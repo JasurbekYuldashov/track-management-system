@@ -1,0 +1,9 @@
+@import "../node_modules/prismjs/themes/prism-tomorrow";
+@import "./assets/scss/app.scss";
+[dir]
+  .vx-wizard.nav.nav-tabs
+  .step-wrapper.nav-item
+  .step.nav-link.done
+  .step-text {
+  color: #fe810b;
+}

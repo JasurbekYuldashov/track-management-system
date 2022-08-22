@@ -1,0 +1,22 @@
+.active-pickup {
+  display: flex;
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.active-pickup > div {
+  display: flex;
+  padding: 10px 20px;
+}
+.active-pickup > div:first-child {
+  padding: 20px 20px;
+  flex: 1;
+}
+.active-pickup p {
+  margin-bottom: 0;
+  margin-right: 20px;
+}
