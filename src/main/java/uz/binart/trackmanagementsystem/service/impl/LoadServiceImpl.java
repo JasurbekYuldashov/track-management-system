@@ -119,25 +119,29 @@ public class LoadServiceImpl implements LoadService {
         }
         List<Set<Long>> splitSets = split(teamIds, 10);
         List<Load> loads = new ArrayList<>();
-
-        for (int i = 0; i < splitSets.size(); i++) {
+        log.warn(String.valueOf(splitSets.get(0)));
+        log.warn(String.valueOf(splitSets.get(1)));
+        log.warn(String.valueOf(splitSets.get(2)));
+        for (int i = 0; i < 10; i++) {
             Set<Long> first = splitSets.get(i);
-            loads.addAll(loadRepository.findAll(
-                    accountingFilteringSpecification(
-                            matchedCarrierLoadIds,
-                            matchedByTruckId,
-                            matchedByDriverId,
-                            first,
-                            loadIdsByCompanySTruck,
-                            startTime,
-                            endTime,
-                            weekly),
-                    Sort.by(Sort.Direction.ASC, "endTime")
-            ));
+            if (first.size() > 0 | i == 0) {
+                loads.addAll(loadRepository.findAll(
+                        accountingFilteringSpecification(
+                                matchedCarrierLoadIds,
+                                matchedByTruckId,
+                                matchedByDriverId,
+                                splitSets.get(i),
+                                loadIdsByCompanySTruck,
+                                startTime,
+                                endTime,
+                                weekly),
+                        Sort.by(Sort.Direction.ASC, "endTime")
+                ));
+            }
         }
         return loads;
 
-   //     return loadRepository.findAll();
+        //     return loadRepository.findAll();
 //        return loadRepository.findAll(
 //                accountingFilteringSpecification(
 //                        matchedCarrierLoadIds,
