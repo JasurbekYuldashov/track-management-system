@@ -85,9 +85,16 @@ public class ScheduleServiceImpl implements ScheduleService {
                     trip.setTripStatusId(tripStatusId);
                     tripService.update(trip);
                 }
-                Unit unit = unitService.getById(trip.getTruckId());
+                Unit unit = null;
+                try {
+                    unitService.getById(trip.getTruckId());
+                } catch (Exception exception){
+                    System.out.println(trip.getId());
+                    System.out.println(exception);
+                }
                 Set<Long> unitStatuses = unitStatusService.exclusionStatuses();
 
+//                if(unit != null){
                 if(unit != null){
 
                     try{
