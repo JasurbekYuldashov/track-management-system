@@ -307,12 +307,13 @@ class Trips extends React.Component {
         this.setState({
             loading: true,
         });
-        let a = moment().isoWeekday(-6); // ISO day of the week with 1 being Monday and 7 being Sunday.
+        // let a = moment().isoWeekday(-6); // ISO day of the week with 1 being Monday and 7 being Sunday.
+        let a = moment().utc(false).startOf('week'); // ISO day of the week with 1 being Monday and 7 being Sunday.
         a.toDate().getTime()
         fetch(
             `/dashboard?sort=id,DESC&size=10000${
                 tab ? `&currentEmployerId=${tab}` : ""
-            }${team ? `&teamId=${team}` : ""}&startTime=${a.toDate().getTime()}&endTime=${moment().toDate().getTime()}`,
+            }${team ? `&teamId=${team}` : ""}&startTime=${a.toDate().getTime()}&endTime=${moment().utc(false).toDate().getTime()}`,
             {
                 headers: {
                     Authorization: this.props.token,
