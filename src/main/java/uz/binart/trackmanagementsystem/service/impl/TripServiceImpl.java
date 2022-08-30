@@ -211,6 +211,11 @@ public class TripServiceImpl implements TripService {
         return null;
     }
 
+    public ArrayList<Long> getTruckLoadsIds(Long tripId) {
+        return null;
+//        return tripRepository.getTruckLoadsIds(tripId);
+    }
+
     private Long resolveTimeForUnit(Long timeStart, Long timeEnd){
         Long currentTime = utilService.getTimeStampWithOffset();
 

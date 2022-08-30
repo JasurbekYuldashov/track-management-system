@@ -52,5 +52,5 @@ public class UnitDashboardDto {
     private String notes;
 
     private String teamColor;
-
+    private Float calc;
 }

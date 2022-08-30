@@ -7,6 +7,8 @@ import uz.binart.trackmanagementsystem.dto.TripForm;
 import uz.binart.trackmanagementsystem.model.Load;
 import uz.binart.trackmanagementsystem.model.Trip;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public interface TripService {
@@ -32,5 +34,6 @@ public interface TripService {
     Page<Trip> getByTruckIdLast(Long id);
 
     Load getTripsLoad(Trip trip);
+    ArrayList<Long> getTruckLoadsIds(Long tripId);
 
 }

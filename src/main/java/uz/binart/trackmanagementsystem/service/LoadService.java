@@ -20,8 +20,11 @@ public interface LoadService {
     List<Load> findAllForAccounting(Long carrierId, Long truckId, Long driverId, Long teamId, Long allByCompanysTruck, Long startTime, Long endTime, Boolean weekly);
 
     List<Load> findUpcoming(Long time);
+    List<Load> findUpcomingByTripId(Long tripId,Long time);
 
     List<Load> findBetween(Long time);
+    List<Load> findBetween(Long time,Long time_);
+    List<Load> findBetweenAndTruckId(Long time,Long lastSaturday,Long truckId);
 
     List<Load> findAfter(Long time);
 

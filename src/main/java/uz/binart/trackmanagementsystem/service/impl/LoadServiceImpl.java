@@ -268,8 +268,27 @@ public class LoadServiceImpl implements LoadService {
         return loadRepository.findAllByStartTimeGreaterThanAndTripIdIsNotNullAndDeletedFalse(time);
     }
 
+//    public List<Load> findUpcomingByTripId(Long tripId,Long time) {
+//        return null;
+//    }
+
+    public List<Load> findUpcomingByTripId(Long tripId, Long time) {
+        return loadRepository.findAllByTruckIdAndStartTimeIsGreaterThan(tripId,time);
+    }
+
     public List<Load> findBetween(Long time) {
+//        return loadRepository
         return loadRepository.findAllByStartTimeLessThanAndEndTimeGreaterThanAndTripIdIsNotNullAndDeletedFalse(time, time);
+    }
+
+    public List<Load> findBetween(Long time,Long time_) {
+//        return loadRepository
+        return loadRepository.findAllByStartTimeLessThanAndEndTimeGreaterThanAndTripIdIsNotNullAndDeletedFalse(time, time_);
+    }
+
+    public List<Load> findBetweenAndTruckId(Long time, Long last, Long truckId) {
+//        return loadRepository.findAllByTruckIdBetweenAndCentralStartTimeIsAfterAndEndTimeLessThan(truckId,time,last);
+        return loadRepository.findAll();
     }
 
     public List<Load> findAfter(Long time) {
