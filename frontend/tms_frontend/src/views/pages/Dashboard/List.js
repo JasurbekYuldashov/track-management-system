@@ -302,18 +302,36 @@ class Trips extends React.Component {
     updateSum = async (index) => {
 
     }
+
+    getLastSaturday(theDate) {
+        var dateToUse = new Date(theDate);
+        var lastSaturday = new Date(new Date().setDate(dateToUse.getDate() - (dateToUse.getDay() == 0 ? 7 : dateToUse.getDay() + 1)));
+        return lastSaturday;
+    }
+
+    getLatestSaturday(theDate) {
+        var dateToUse = new Date(theDate);
+        var latestSaturday = new Date(new Date().setDate(dateToUse.getDate() - dateToUse.getDay() + 1));
+        return latestSaturday;
+    }
+
     updateInfo = async (tab = 0, team = 0) => {
 
         this.setState({
             loading: true,
         });
+        const date = new Date()
+        date.setHours(0, 0, 0, 0)
+        console.log(moment(date).utc().subtract(1, 'weeks').endOf('week').toDate().getTime()-86400000);
+        console.log(this.getLastSaturday(date))
+        console.log(this.getLastSaturday(date))
         // let a = moment().isoWeekday(-6); // ISO day of the week with 1 being Monday and 7 being Sunday.
-        let a = moment().utc(false).startOf('week'); // ISO day of the week with 1 being Monday and 7 being Sunday.
+        let a = moment().utc(false).isoWeek(-6); // ISO day of the week with 1 being Monday and 7 being Sunday.
         a.toDate().getTime()
         fetch(
             `/dashboard?sort=id,DESC&size=10000${
                 tab ? `&currentEmployerId=${tab}` : ""
-            }${team ? `&teamId=${team}` : ""}&startTime=${a.toDate().getTime()}&endTime=${moment().utc(false).toDate().getTime()}`,
+            }${team ? `&teamId=${team}` : ""}&startTime=${moment(date).utc().subtract(1, 'weeks').endOf('week').toDate().getTime()-86400000}&endTime=${moment().utc(false).toDate().getTime()}`,
             {
                 headers: {
                     Authorization: this.props.token,

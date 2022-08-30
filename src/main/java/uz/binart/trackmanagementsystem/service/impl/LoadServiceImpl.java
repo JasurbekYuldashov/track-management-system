@@ -119,9 +119,9 @@ public class LoadServiceImpl implements LoadService {
         }
         List<Set<Long>> splitSets = split(teamIds, 10);
         List<Load> loads = new ArrayList<>();
-        log.warn(String.valueOf(splitSets.get(0)));
-        log.warn(String.valueOf(splitSets.get(1)));
-        log.warn(String.valueOf(splitSets.get(2)));
+//        log.warn(String.valueOf(splitSets.get(0)));
+//        log.warn(String.valueOf(splitSets.get(1)));
+//        log.warn(String.valueOf(splitSets.get(2)));
         for (int i = 0; i < 10; i++) {
             Set<Long> first = splitSets.get(i);
             if (first.size() > 0 | i == 0) {

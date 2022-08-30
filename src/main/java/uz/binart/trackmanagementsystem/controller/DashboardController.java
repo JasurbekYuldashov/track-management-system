@@ -64,41 +64,39 @@ public class DashboardController {
         return calendar.getTime();
     }
 
-    private Long getLastSaturday() {
-
-        LocalDate CurrentDate = LocalDate.now();
-
-        YearMonth ym = YearMonth.of(CurrentDate.getYear(), CurrentDate.getMonth());
-        //YearMonth ym = YearMonth.of(2018, 9);
-        LocalDate endDate = ym.atEndOfMonth();
-
-        DayOfWeek day = endDate.getDayOfWeek();
-        int lastDay = day.getValue();
-
-        System.out.print("The last Saturday of the month falls on: ");
-
-        if (lastDay < 6)
-            endDate = endDate.minusDays(lastDay + 1);
-        else if (lastDay > 6)
-            endDate = endDate.minusDays(1);
-
-        System.out.println(endDate);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
-        Date date = null;
-        try {
-            date = sdf.parse(String.valueOf(endDate));
-        } catch (ParseException e) {
-//            throw new RuntimeException(e);
-        }
-//        date.setTime(0);
-//        date.setHours(0);
-//        date.setMinutes(0);
-//        date.setSeconds(0);
-        long millis = trim(date).getTime();
-        return millis;
-    }
-
-    ;
+//    private Long getLastSaturday() {
+//
+//        LocalDate CurrentDate = LocalDate.now();
+//
+//        YearMonth ym = YearMonth.of(CurrentDate.getYear(), CurrentDate.getMonth());
+//        //YearMonth ym = YearMonth.of(2018, 9);
+//        LocalDate endDate = ym.atEndOfMonth();
+//
+//        DayOfWeek day = endDate.getDayOfWeek();
+//        int lastDay = day.getValue();
+//
+//        System.out.print("The last Saturday of the month falls on: ");
+//
+//        if (lastDay < 6)
+//            endDate = endDate.minusDays(lastDay + 1);
+//        else if (lastDay > 6)
+//            endDate = endDate.minusDays(1);
+//
+//        System.out.println(endDate);
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd");
+//        Date date = null;
+//        try {
+//            date = sdf.parse(String.valueOf(endDate));
+//        } catch (ParseException e) {
+////            throw new RuntimeException(e);
+//        }
+////        date.setTime(0);
+////        date.setHours(0);
+////        date.setMinutes(0);
+////        date.setSeconds(0);
+//        long millis = trim(date).getTime();
+//        return millis;
+//    };
 
     @GetMapping("/context")
     private ResponseEntity<?> getContext() {
@@ -173,10 +171,10 @@ public class DashboardController {
         unitDtoList.addAll(packToDto(noDriver.getContent()));
 //        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Madrid"));
 //        calendar.add(Calendar.HOUR_OF_DAY, 0);
-        Date date = new Date();
-        Long currentTime = date.getTime();
-        Long lastSaturday = getLastSaturday();
-        Long minusTime = currentTime - lastSaturday;
+//        Date date = new Date();
+//        Long currentTime = date.getTime();
+//        Long lastSaturday = getLastSaturday();
+        Long minusTime = endTime - startTime;
 
         for (int i = 0; i < unitDtoList.size(); i++) {
             UnitDashboardDto asd = unitDtoList.get(i);
@@ -191,43 +189,57 @@ public class DashboardController {
                 if (asd.getTruckId() != null) {
 //                    List<String> ids = tripRepository.test1(asd.getTruckId());
 //                    List<Load> loadss = loadRepository.testatssad(ids.stream().map(Long::parseLong).collect(Collectors.toList()), lastSaturday, currentTime);
-                    Calendar start = Calendar.getInstance();
-                    Calendar end = Calendar.getInstance();
-
-                    start.setTime(new Date(currentTime));
-                    end.setTime(new Date(lastSaturday));
+//                    Calendar start = Calendar.getInstance();
+//                    Calendar end = Calendar.getInstance();
+//
+//                    start.setTime(new Date(currentTime));
+//                    end.setTime(new Date(lastSaturday));
                     List<AccountingDto> loadss = accountingService.getProperInfo(null, asd.getTruckId(), null, null, null, startTime, endTime, true, false);
                     float a = 0;
+                    float b = 0;
                     for (int j = 0; j < loadss.size(); j++) {
                         try {
                             AccountingDto load = loadss.get(j);
-                            a += load.getBooked();
-//                            Long startTime = load.getCentralStartTime();
-//                            Long endTime = load.getCentralEndTime();
-//                            Long a1 = endTime - startTime;
+                            for (int k = 0; k < load.getSegmentedPrices().length; k++) {
+                                a+=load.getSegmentedPrices()[k];
+                            }
+//                            a += load.getBooked();
+//                            Long startTime1 = load.getTimeStart();
+//                            Long endTime2 = load.getEndTime();
+//                            Long a1 = endTime - startTime1;
 //                            float summ = load.getBooked() != null ? load.getBooked() : 0;
-//                            a += summ;
+//                            System.out.println(load.getSegmentedPrices().toString());
+////                            a += summ;
 //                            b += summ;
-//                            float summ1 = load.getRcPrice() != null ? load.getRcPrice() : 0;
-//                            if (currentTime - startTime < 0) {
+////                            float summ1 = load.getNetPaid() != null ? load.getBooked() : 0;
+//                            if (a1 < 0) {
 //                                break;
-//                            } else if (startTime <= lastSaturday && endTime >= currentTime) {
-//                                //booked
+//                            } else if (startTime1 <= startTime && endTime2 >= endTime) {
+//                                System.out.println(1);
 //                                a += (minusTime * summ) / a1;
-//                            } else if (lastSaturday <= startTime && currentTime >= endTime) {
-//                                a += summ1;
-//                            } else if (lastSaturday <= startTime && endTime >= currentTime) {
-//                                minusTime = currentTime - startTime;
+//                            } else if (startTime <= startTime1 && endTime >= endTime2) {
+//                                System.out.println(2);
+//                                a += summ;
+//                            } else if (startTime <= startTime1 && endTime2 >= endTime) {
+//                                System.out.println(3);
+//                                minusTime = endTime - startTime1;
 //                                a += minusTime * summ / a1;
-//                            } else if (startTime <= lastSaturday && currentTime >= endTime) {
-//                                minusTime = endTime - lastSaturday;
-//                                a += minusTime * summ1 / a1;
+//                            } else if (startTime1 <= startTime && endTime >= endTime2) {
+//                                System.out.println(4);
+//                                minusTime = endTime2 - startTime;
+//                                a += minusTime * summ / a1;
 //                            }
                         } catch (Exception e) {
 
                         }
                     }
+                    System.out.println(a);
+                    System.out.println(b);
+//                    if (b==6000){
+//                        System.out.println(a);
+//                    }
                     asd.setCalc(a);
+                    asd.setCalc1(a);
                     unitDtoList.set(i, asd);
                 }
             } catch (Exception e) {
