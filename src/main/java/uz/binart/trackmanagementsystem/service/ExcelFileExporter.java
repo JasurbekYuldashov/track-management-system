@@ -370,9 +370,10 @@ public class ExcelFileExporter {
     static String castToCentralAndFormatTime(Long time){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd-YYYY HH:mm");
         Date result = new Date(time);
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(result);
-        return simpleDateFormat.format(calendar.getTime());
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTime(result);
+//        calendar.add(Calendar.HOUR_OF_DAY, -2);
+        return simpleDateFormat.format(result);
     }
 
     static List<String> getHeaders(Long timeStart, Long timeEnd){
