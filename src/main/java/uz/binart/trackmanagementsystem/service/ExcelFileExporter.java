@@ -278,9 +278,9 @@ public class ExcelFileExporter {
                 dataRow.createCell(1).setCellValue(acc.getCarrierName());
                 dataRow.createCell(2).setCellValue(acc.getRc());
                 dataRow.createCell(3).setCellValue(acc.getCompany());
-                dataRow.createCell(4).setCellValue(acc.getTimeStart());
+                dataRow.createCell(4).setCellValue(castToCentralAndFormatTime(acc.getTimeStart()));
                 dataRow.createCell(5).setCellValue(acc.getShipperCompanyLocation());
-                dataRow.createCell(6).setCellValue(acc.getEndTime());
+                dataRow.createCell(6).setCellValue(castToCentralAndFormatTime(acc.getEndTime()));
                 dataRow.createCell(7).setCellValue(acc.getEndLocation());
                 if(acc.getTruckNumber() != null) {
                     Map<String, String> number = splitTruckNumber(acc.getTruckNumber());
@@ -372,7 +372,6 @@ public class ExcelFileExporter {
         Date result = new Date(time);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(result);
-        calendar.add(Calendar.HOUR_OF_DAY, -2);
         return simpleDateFormat.format(calendar.getTime());
     }
 
