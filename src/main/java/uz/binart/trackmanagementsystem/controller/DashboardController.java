@@ -196,58 +196,20 @@ public class DashboardController {
 //                    end.setTime(new Date(lastSaturday));
                     List<AccountingDto> loadss = accountingService.getProperInfo(null, asd.getTruckId(), null, null, null, startTime, endTime, true, false);
                     float a = 0;
-                    float b = 0;
-                    for (int j = 0; j < loadss.size(); j++) {
+                    for (AccountingDto accountingDto : loadss) {
                         try {
-                            AccountingDto load = loadss.get(j);
-                            for (int k = 0; k < load.getSegmentedPrices().length; k++) {
-                                a+=load.getSegmentedPrices()[k];
+                            for (int k = 0; k < accountingDto.getSegmentedPrices().length; k++) {
+                                a += accountingDto.getSegmentedPrices()[k];
                             }
-//                            a += load.getBooked();
-//                            Long startTime1 = load.getTimeStart();
-//                            Long endTime2 = load.getEndTime();
-//                            Long a1 = endTime - startTime1;
-//                            float summ = load.getBooked() != null ? load.getBooked() : 0;
-//                            System.out.println(load.getSegmentedPrices().toString());
-////                            a += summ;
-//                            b += summ;
-////                            float summ1 = load.getNetPaid() != null ? load.getBooked() : 0;
-//                            if (a1 < 0) {
-//                                break;
-//                            } else if (startTime1 <= startTime && endTime2 >= endTime) {
-//                                System.out.println(1);
-//                                a += (minusTime * summ) / a1;
-//                            } else if (startTime <= startTime1 && endTime >= endTime2) {
-//                                System.out.println(2);
-//                                a += summ;
-//                            } else if (startTime <= startTime1 && endTime2 >= endTime) {
-//                                System.out.println(3);
-//                                minusTime = endTime - startTime1;
-//                                a += minusTime * summ / a1;
-//                            } else if (startTime1 <= startTime && endTime >= endTime2) {
-//                                System.out.println(4);
-//                                minusTime = endTime2 - startTime;
-//                                a += minusTime * summ / a1;
-//                            }
-                        } catch (Exception e) {
+                        } catch (Exception ignored) {
 
                         }
                     }
-                    System.out.println(a);
-                    System.out.println(b);
-//                    if (b==6000){
-//                        System.out.println(a);
-//                    }
                     asd.setCalc(a);
                     asd.setCalc1(a);
                     unitDtoList.set(i, asd);
                 }
-            } catch (Exception e) {
-//                System.out.print(e);
-//                System.out.print("     ");
-//                System.out.print(asd.getTripId());
-//                System.out.print("     ");
-//                System.out.print(asd.getTruckId());
+            } catch (Exception ignored) {
             }
         }
         map.put("data", unitDtoList);
@@ -263,8 +225,6 @@ public class DashboardController {
             UnitDashboardDto dto = new UnitDashboardDto();
             dto.setTruckId(unit.getId());
             dto.setNumber(unit.getNumber());
-
-            //  Driver driver = driverService.getByTruckId(unit.getId());
 
             UnitType unitType = unitTypeService.getFromManualCache(unit.getUnitTypeId());
             if (unitType != null) {
