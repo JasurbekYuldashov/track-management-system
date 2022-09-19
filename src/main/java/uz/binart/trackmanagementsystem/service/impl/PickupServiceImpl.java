@@ -100,6 +100,7 @@ public class PickupServiceImpl implements PickupService {
                 currentMin = pickup.getPickupDate().getTime();
             }
         }
+        System.out.println(currentMin);
 
         return currentMin;
     }
@@ -108,11 +109,13 @@ public class PickupServiceImpl implements PickupService {
         long currentMax = Long.MIN_VALUE;
         List<Pickup> pickups = pickupRepository.findAllByIdIn(pickupIds);
 
+
         for(Pickup pickup: pickups){
             if(pickup.getPickupDate().getTime() > currentMax){
                 currentMax = pickup.getPickupDate().getTime();
             }
         }
+        System.out.println(currentMax);
 
         return currentMax;
     }

@@ -8,10 +8,7 @@ import uz.binart.trackmanagementsystem.model.*;
 import uz.binart.trackmanagementsystem.service.*;
 import uz.binart.trackmanagementsystem.service.status.UnitStatusService;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @Component
@@ -30,7 +27,10 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.HOUR_OF_DAY, -11);
-        Long currentTime = calendar.getTimeInMillis();
+//        Long currentTime = calendar.getTimeInMillis();
+        Long currentTime = new Date().getTime();
+        System.out.println(currentTime);
+//        System.out.println(new Date().getTime());
 
         setStatuses(loadService.findAfter(currentTime), 3L, 3L, true, false, false, true, currentTime);
 
@@ -70,12 +70,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     private void setStatuses(List<Load> loads, Long tripStatusId, Long unitStatusId, Boolean unbind, Boolean upcoming, Boolean covered, Boolean history, Long currentTime){
 
         for(Load load: loads){
-
+//            System.out.println(tripStatusId);
             Optional<Trip> tripOptional = tripService.getById(load.getTripId());
             if(tripOptional.isPresent()){
                 Trip trip = tripOptional.get();
+                System.out.println(trip.getDeleted());
                 if(trip.getDeleted())
                     continue;
+
 
                 if(trip.getTripStatusId() == null) {
                     trip.setTripStatusId(tripStatusId);
@@ -87,7 +89,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 }
                 Unit unit = null;
                 try {
-                    unitService.getById(trip.getTruckId());
+                    unit = unitService.getById(trip.getTruckId());
                 } catch (Exception exception){
                     System.out.println(trip.getId());
                     System.out.println(exception);
@@ -96,6 +98,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
 //                if(unit != null){
                 if(unit != null){
+                    System.out.println(trip.getTripStatusId());
 
                     try{
                         if(!unitStatuses.contains(unit.getUnitStatusId()))
