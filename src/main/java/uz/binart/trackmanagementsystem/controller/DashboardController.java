@@ -122,7 +122,7 @@ public class DashboardController {
             @RequestParam(name = "startTime") Long startTime,
             @RequestParam(name = "endTime") Long endTime
     ) {
-        System.out.println(teamId);
+        System.out.println(startTime);
 
         UnitDto unitDto = new UnitDto();
 
@@ -185,7 +185,6 @@ public class DashboardController {
 ////                String s1 = tripRepository.test111(asd.getTruckId());
 //
 //            }
-            System.out.println(asd.getEndTime());
             try {
                 if (asd.getTruckId() != null) {
 //                    List<String> ids = tripRepository.test1(asd.getTruckId());
@@ -291,7 +290,6 @@ public class DashboardController {
                     String correctedViaCentralTimeZoneTime = resolveTime(deliveryDto.getDeliveryDate(), company);
                     dto.setFrom(pickupDto.getConsigneeNameAndLocation());
                     dto.setTo(deliveryDto.getConsigneeNameAndLocation());
-                    System.out.println(correctedViaCentralTimeZoneTime);
                     dto.setEndTime(correctedViaCentralTimeZoneTime);
                 }
                 dto.setTripId(trip.getId());
@@ -327,8 +325,8 @@ public class DashboardController {
     private String resolveTime(Date date, Company company) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        Integer timeZone = -5;
-        Integer central = -5;
+        Integer timeZone = -6;
+        Integer central = -6;
         if (company.getLocationId() != null) {
 
             Location location = locationService.findById(company.getLocationId());

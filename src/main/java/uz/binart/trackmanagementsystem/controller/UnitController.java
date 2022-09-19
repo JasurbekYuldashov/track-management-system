@@ -257,9 +257,6 @@ public class UnitController {
         unitDto.setVisibleTeamIds(visibleTeamIds);
         Page<Unit> units = unitService.findFiltered(unitDto, pageable);
 
-        System.out.println(visibleIds);
-        System.out.println(visibleTeamIds);
-
         ModelMapper modelMapper = new ModelMapper();
 
         List<UnitDto> unitDtoS = new ArrayList<>();
