@@ -82,7 +82,8 @@ public class DeliveryController {
     @PutMapping("/edit")
     public ResponseEntity<String> edit(@RequestBody @Valid DeliveryDto deliveryDto) throws ParseException{
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
-      //  deliveryDto.setDeliveryDateFormatted(simpleDateFormat.parse(new Date(deliveryDto.getDeliveryDate_())).toString());
+//        System.out.println(String.valueOf(new Date(deliveryDto.getDeliveryDate_())));
+//        deliveryDto.setDeliveryDateFormatted(simpleDateFormat.parse(String.valueOf(new Date(deliveryDto.getDeliveryDate_()))).toString());
         Delivery delivery = modelMapper.map(deliveryDto, Delivery.class);
         delivery.setDeliveryDate(new Date(deliveryDto.getDeliveryDate_()));
         User user = userService.getCurrentUserFromContext();
