@@ -2,16 +2,23 @@ package uz.binart.trackmanagementsystem.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import uz.binart.trackmanagementsystem.model.*;
 import uz.binart.trackmanagementsystem.service.*;
 import uz.binart.trackmanagementsystem.service.status.UnitStatusService;
 
-import java.util.Calendar;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.time.temporal.ChronoField;
 
 @Slf4j
 @Component
@@ -25,12 +32,34 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final DriverService driverService;
     private final ExpirationNotificationService expirationNotificationService;
 
-    @Scheduled(fixedRate = 30000)
-    public void updateTripAndUnitStatuses(){
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.HOUR_OF_DAY, -11);
-        Long currentTime = calendar.getTimeInMillis();
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Scheduled(fixedRate = 30000)
+    public void updateTripAndUnitStatuses() throws JSONException {
+
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.add(Calendar.HOUR_OF_DAY, -11);
+//        Long currentTime = calendar.getTimeInMillis();
+//        Long currentTime = new Date().getTime();
+//        System.out.println(currentTime);
+//        System.out.println(new Date().getTime());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+        HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+        ResponseEntity<String> time = restTemplate.exchange("https://timeapi.io/api/Time/current/zone?timeZone=America/Chicago", HttpMethod.GET, entity, String.class);
+        JSONObject jsonObject = new JSONObject(time.getBody());
+//        System.out.println(time.getBody());
+
+        LocalDateTime dateTime = LocalDateTime.parse(jsonObject.get("dateTime").toString());
+        Timestamp timestamp = Timestamp.valueOf(dateTime);
+
+//        System.out.println(timestamp.getTime());
+        Long currentTime = timestamp.getTime();
 
         setStatuses(loadService.findAfter(currentTime), 3L, 3L, true, false, false, true, currentTime);
 
@@ -70,12 +99,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     private void setStatuses(List<Load> loads, Long tripStatusId, Long unitStatusId, Boolean unbind, Boolean upcoming, Boolean covered, Boolean history, Long currentTime){
 
         for(Load load: loads){
-
+//            System.out.println(tripStatusId);
             Optional<Trip> tripOptional = tripService.getById(load.getTripId());
             if(tripOptional.isPresent()){
                 Trip trip = tripOptional.get();
+
                 if(trip.getDeleted())
                     continue;
+
 
                 if(trip.getTripStatusId() == null) {
                     trip.setTripStatusId(tripStatusId);
@@ -87,7 +118,7 @@ public class ScheduleServiceImpl implements ScheduleService {
                 }
                 Unit unit = null;
                 try {
-                    unitService.getById(trip.getTruckId());
+                    unit = unitService.getById(trip.getTruckId());
                 } catch (Exception exception){
                     System.out.println(trip.getId());
                     System.out.println(exception);

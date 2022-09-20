@@ -5,7 +5,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.client.RestTemplate;
 import uz.binart.trackmanagementsystem.property.FileStorageProperties;
 import uz.binart.trackmanagementsystem.service.TruckLoadService;
 
@@ -20,7 +22,11 @@ public class TrackManagementSystemApplication {
 	public static void main(String[] args) {
 
 		SpringApplication.run(TrackManagementSystemApplication.class, args);
+	}
 
+	@Bean
+	public RestTemplate getRestTemplate() {
+		return new RestTemplate();
 	}
 
 }

@@ -80,6 +80,7 @@ public class LoadController {
     @PutMapping("/edit")
     public ResponseEntity<Map<String, Object>> updateLoad(@RequestBody /*@Valid */LoadDto loadDto){
 
+        System.out.println(loadDto.getPickups().get(0));
         Load load = mapper.map(loadDto, Load.class);
         Map<String, Object> result = new HashMap<>();
         User user = userService.getCurrentUserFromContext();

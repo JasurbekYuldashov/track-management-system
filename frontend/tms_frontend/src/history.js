@@ -1,2 +1,2 @@
-import { createBrowserHistory } from "history"
-export let history = createBrowserHistory()
+import { createBrowserHistory } from "history";
+export let history = createBrowserHistory();
