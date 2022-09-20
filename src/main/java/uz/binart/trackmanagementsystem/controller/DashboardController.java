@@ -3,11 +3,15 @@ package uz.binart.trackmanagementsystem.controller;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import uz.binart.trackmanagementsystem.dto.*;
 import uz.binart.trackmanagementsystem.model.*;
 import uz.binart.trackmanagementsystem.model.status.UnitStatus;
@@ -22,10 +26,12 @@ import uz.binart.trackmanagementsystem.service.type.OwnershipTypeService;
 import uz.binart.trackmanagementsystem.service.type.UnitTypeService;
 
 import java.lang.reflect.Type;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -52,6 +58,9 @@ public class DashboardController {
     private final UtilService utilService;
     private final TeamService teamService;
     private final OwnershipTypeService ownerShipTypeService;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     private static Date trim(Date date) {
         Calendar calendar = Calendar.getInstance();
@@ -121,8 +130,8 @@ public class DashboardController {
             Pageable pageable,
             @RequestParam(name = "startTime") Long startTime,
             @RequestParam(name = "endTime") Long endTime
-    ) {
-        System.out.println(startTime);
+    ) throws JSONException {
+        System.out.println(teamId);
 
         UnitDto unitDto = new UnitDto();
 
@@ -185,6 +194,7 @@ public class DashboardController {
 ////                String s1 = tripRepository.test111(asd.getTruckId());
 //
 //            }
+            System.out.println(asd.getEndTime());
             try {
                 if (asd.getTruckId() != null) {
 //                    List<String> ids = tripRepository.test1(asd.getTruckId());
@@ -217,7 +227,7 @@ public class DashboardController {
         return map;
     }
 
-    List<UnitDashboardDto> packToDto(List<Unit> units) {
+    List<UnitDashboardDto> packToDto(List<Unit> units) throws JSONException {
 
         List<UnitDashboardDto> unitDtoList = new ArrayList<>();
 
@@ -290,6 +300,7 @@ public class DashboardController {
                     String correctedViaCentralTimeZoneTime = resolveTime(deliveryDto.getDeliveryDate(), company);
                     dto.setFrom(pickupDto.getConsigneeNameAndLocation());
                     dto.setTo(deliveryDto.getConsigneeNameAndLocation());
+                    System.out.println(correctedViaCentralTimeZoneTime);
                     dto.setEndTime(correctedViaCentralTimeZoneTime);
                 }
                 dto.setTripId(trip.getId());
@@ -297,7 +308,22 @@ public class DashboardController {
             } else if (dto.getUnitStatusId().equals(3L) && unit.getReadyFrom() != null) {
                 Calendar calendar = Calendar.getInstance();
                 calendar.add(Calendar.HOUR_OF_DAY, -11);
-                Long currentTime = calendar.getTimeInMillis();
+//                Long currentTime = calendar.getTimeInMillis();
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+                HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+                ResponseEntity<String> time = restTemplate.exchange("https://timeapi.io/api/Time/current/zone?timeZone=America/Chicago", HttpMethod.GET, entity, String.class);
+                JSONObject jsonObject = new JSONObject(time.getBody());
+//        System.out.println(time.getBody());
+
+                LocalDateTime dateTime = LocalDateTime.parse(jsonObject.get("dateTime").toString());
+                Timestamp timestamp = Timestamp.valueOf(dateTime);
+
+//        System.out.println(timestamp.getTime());
+                Long currentTime = timestamp.getTime();
 
                 long numberOfHours = (currentTime - unit.getReadyFrom()) / 3600000L;
 

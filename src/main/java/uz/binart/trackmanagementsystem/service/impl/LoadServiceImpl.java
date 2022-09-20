@@ -329,6 +329,7 @@ public class LoadServiceImpl implements LoadService {
 
         validateLoad(load, true);
 
+
         if (loadRepository.existsByCustomLoadNumberAndIdNotAndDeletedFalse(load.getCustomLoadNumber(), load.getId()))
             throw new WrongEntityStructureException("another load's number violation");
 
