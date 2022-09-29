@@ -2,6 +2,7 @@ package uz.binart.trackmanagementsystem.controller;
 
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,13 +35,13 @@ public class AccountingController {
                                         @RequestParam(name = "team_id", required = false)Long teamId,
                                         @RequestParam(name = "all_by_companys_truck", required = false)Long allByCompanysTruckId,
                                         @RequestParam(name = "startTime")Long startTime,
-                                        @RequestParam(name = "endTime")Long endTime){
+                                        @RequestParam(name = "endTime")Long endTime) throws JSONException {
 
-        Calendar start = Calendar.getInstance();
-        Calendar end = Calendar.getInstance();
+//        Calendar start = Calendar.getInstance();
+//        Calendar end = Calendar.getInstance();
 
-        start.setTime(new Date(startTime));
-        end.setTime(new Date(endTime));
+//        start.setTime(new Date(startTime));
+//        end.setTime(new Date(endTime));
         User user = userService.getCurrentUserFromContext();
 
         if(user == null){
@@ -52,7 +53,7 @@ public class AccountingController {
 
         if(user.getRoleId().equals(2))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you don't have permission");
-        List<AccountingDto> list = accountingService.getProperInfo(carrierId, truckId, driverId, teamId, allByCompanysTruckId, startTime, endTime, false, user.getRoleId() == 2);
+        List<AccountingDto> list = accountingService.getProperInfoReport(carrierId, truckId, driverId, teamId, allByCompanysTruckId, startTime, endTime, false, user.getRoleId() == 2);
         return ResponseEntity.ok(list);
     }
 
@@ -65,7 +66,7 @@ public class AccountingController {
                                                @RequestParam(name = "all_by_companys_truck", required = false)Long allByCompanysTruckId,
                                                @RequestParam(name = "startTime")Long startTime,
                                                @RequestParam(name = "endTime")Long endTime,
-                                               @RequestParam(name = "weekly", required = false, defaultValue = "false")Boolean weekly) {
+                                               @RequestParam(name = "weekly", required = false, defaultValue = "false")Boolean weekly) throws JSONException {
 
         User user = userService.getCurrentUserFromContext();
 
@@ -79,7 +80,7 @@ public class AccountingController {
         if(user.getRoleId().equals(2))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("you don't have permission");
 
-        List<AccountingDto> list = accountingService.getProperInfo(carrierId, truckId, driverId, teamId, allByCompanysTruckId, startTime, endTime, weekly, user.getRoleId() == 2);
+        List<AccountingDto> list = accountingService.getProperInfoReport(carrierId, truckId, driverId, teamId, allByCompanysTruckId, startTime, endTime, weekly, user.getRoleId() == 2);
 
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/octet-stream")).header("Content-Disposition", "attachment; filename=report.xlsx")
                 .body(new ByteArrayResource(ExcelFileExporter.accountingInfoDto(list, startTime, endTime, weekly, user.getRoleId() == 2).readAllBytes()));

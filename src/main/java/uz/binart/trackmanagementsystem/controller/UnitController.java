@@ -248,7 +248,8 @@ public class UnitController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<Map<String, Object>> getList(UnitDto unitDto, @PageableDefault(size = 40, sort = {"number"}, direction = Sort.Direction.ASC)Pageable pageable){
+    public ResponseEntity<Map<String, Object>> getList(UnitDto unitDto,
+                                                       @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable){
 
         User user = userService.getCurrentUserFromContext();
         List<Long> visibleIds = utilService.getVisibleIds(user);
@@ -256,9 +257,6 @@ public class UnitController {
         unitDto.setVisibleIds(visibleIds);
         unitDto.setVisibleTeamIds(visibleTeamIds);
         Page<Unit> units = unitService.findFiltered(unitDto, pageable);
-
-        System.out.println(visibleIds);
-        System.out.println(visibleTeamIds);
 
         ModelMapper modelMapper = new ModelMapper();
 

@@ -1,12 +1,16 @@
 package uz.binart.trackmanagementsystem.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.binart.trackmanagementsystem.dto.OwnedCompanyDto;
 import uz.binart.trackmanagementsystem.dto.OwnedCompanyListDto;
+import uz.binart.trackmanagementsystem.model.Load;
 import uz.binart.trackmanagementsystem.model.OwnedCompany;
 import uz.binart.trackmanagementsystem.model.User;
 import uz.binart.trackmanagementsystem.service.*;
@@ -55,8 +59,7 @@ public class OwnedCompanyController {
     public ResponseEntity<?> getAllForDashBoard(){
         User user = userService.getCurrentUserFromContext();
         if(user == null)
-            return ResponseEntity.badRequest().body("fuck you");
-
+            return ResponseEntity.badRequest().body("Bad request");
 
         List<Long> visibleIds = user.getVisibleIds();
         if(visibleIds == null)

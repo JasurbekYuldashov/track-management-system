@@ -310,6 +310,7 @@ public class ExcelFileExporter {
                 dataRow.createCell(18 + rowsToAdd + accountingAndAdminRows).setCellValue(acc.getNote());
 
             }
+            sheet.createFreezePane(0, 2);
 
             sheet.autoSizeColumn(0);
             sheet.autoSizeColumn(1);

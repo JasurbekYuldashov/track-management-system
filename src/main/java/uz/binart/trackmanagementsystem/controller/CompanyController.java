@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uz.binart.trackmanagementsystem.dto.ChildDto;
 import uz.binart.trackmanagementsystem.dto.CompanyDto;
+import uz.binart.trackmanagementsystem.dto.OwnedCompanyListDto;
 import uz.binart.trackmanagementsystem.model.Company;
 import uz.binart.trackmanagementsystem.model.User;
 import uz.binart.trackmanagementsystem.model.type.CustomerType;
@@ -104,8 +105,15 @@ public class CompanyController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<List<CompanyDto>> getList(Pageable pageable){
-        return ResponseEntity.ok(packToDto(companyService.findFiltered(pageable).getContent()));
+    public ResponseEntity<Map<String, Object>> getList(Pageable pageable){
+        Map<String, Object> map = new HashMap<>();
+        Page<Company> companies = companyService.findFiltered(pageable);
+        List<CompanyDto> companyDtos = packToDto(companies.getContent());
+        map.put("data", companyDtos);
+        map.put("page", companies.getNumber());
+        map.put("total_pages", companies.getTotalPages());
+        map.put("total_elements", companies.getTotalElements());
+        return ResponseEntity.ok(map);
     }
 
     @PutMapping("/edit")

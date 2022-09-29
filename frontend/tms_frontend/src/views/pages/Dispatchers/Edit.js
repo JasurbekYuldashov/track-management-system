@@ -13,14 +13,13 @@ import {
     // Button
 } from "reactstrap";
 import * as Icon from "react-feather";
-import {connect} from "react-redux";
-import {toast, Flip} from "react-toastify";
-import {Spin} from "antd";
-import {LoadingOutlined} from "@ant-design/icons";
+import { connect } from "react-redux";
+import { toast, Flip } from "react-toastify";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 import Select from "react-select";
 
 class EditUser extends React.Component {
-
     state = {
         states: [],
         customer_types: [],
@@ -39,10 +38,10 @@ class EditUser extends React.Component {
             email: document.querySelector("#email").value,
             phone: document.querySelector("#phoneNumber").value,
             visibleIds: this.state.selectedCompanies,
-            visibleTeamIds: this.state.selectedTeams
+            visibleTeamIds: this.state.selectedTeams,
         };
 
-        fetch("/admin/edit_user", {
+        fetch(process.env.REACT_APP_BASE_URL + "/admin/edit_user", {
             headers: {
                 Authorization: this.props.token,
                 "Content-Type": "application/json",
@@ -51,42 +50,51 @@ class EditUser extends React.Component {
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.ok) {
-                toast.success("User successfuly edited", {transition: Flip});
+                toast.success("User successfuly edited", { transition: Flip });
                 window.history.back();
             } else {
-                toast.error("Something went wrong", {transition: Flip});
+                toast.error("Something went wrong", { transition: Flip });
                 res.text();
             }
         });
     };
-    handleCompanySelect = (array) =>{
-
-        let letMappedCompanies = []
-        if(array != null)
+    handleCompanySelect = (array) => {
+        let letMappedCompanies = [];
+        if (array != null)
             letMappedCompanies = array.map((element) => {
                 return element.value;
-            })
+            });
 
-        this.setState({selectedCompanies : letMappedCompanies, selectedCompanyOptions: array})
-    }
+        this.setState({
+            selectedCompanies: letMappedCompanies,
+            selectedCompanyOptions: array,
+        });
+    };
 
     handleTeamSelect = (array) => {
         let mappedTeams = [];
-        if(array != null){
+        if (array != null) {
             mappedTeams = array.map((team) => {
-                return team.value
-            })
+                return team.value;
+            });
         }
 
-        this.setState({selectedTeams: mappedTeams, selectedTeamOptions: array})
-    }
+        this.setState({
+            selectedTeams: mappedTeams,
+            selectedTeamOptions: array,
+        });
+    };
 
     componentDidMount() {
-        fetch(`/admin/${this.props.match.params.id}`, {
-            headers: {
-                Authorization: this.props.token,
-            },
-        })
+        fetch(
+            process.env.REACT_APP_BASE_URL +
+                `/admin/${this.props.match.params.id}`,
+            {
+                headers: {
+                    Authorization: this.props.token,
+                },
+            }
+        )
             .then((res) => res.json())
             .then((data) => {
                 this.setState({
@@ -94,45 +102,39 @@ class EditUser extends React.Component {
                 });
 
                 let selectedOptions = data.visibleIds.map((id) => {
-                    for(let i = 0; i < data.availableCompanies.length; i++){
-                        if(data.availableCompanies[i].id === id)
-                            return (
-                                {
-                                    value: id,
-                                    label: data.availableCompanies[i].name
-                                }
-                            )
+                    for (let i = 0; i < data.availableCompanies.length; i++) {
+                        if (data.availableCompanies[i].id === id)
+                            return {
+                                value: id,
+                                label: data.availableCompanies[i].name,
+                            };
                     }
                 });
-                let mappedCompanyData = data.availableCompanies.map((company) => {
-                    return (
-                        {
+                let mappedCompanyData = data.availableCompanies.map(
+                    (company) => {
+                        return {
                             value: company.id,
-                            label: company.name
-                        }
-                    )
-                })
+                            label: company.name,
+                        };
+                    }
+                );
 
                 let selectedTeamOptions = data.visibleTeamIds.map((id) => {
-                    for(let i = 0; i < data.availableTeams.length; i++){
-                        if(data.availableTeams[i].id === id)
-                            return (
-                                {
-                                    value: id,
-                                    label: data.availableTeams[i].name
-                                }
-                            )
+                    for (let i = 0; i < data.availableTeams.length; i++) {
+                        if (data.availableTeams[i].id === id)
+                            return {
+                                value: id,
+                                label: data.availableTeams[i].name,
+                            };
                     }
-                })
+                });
 
                 let mappedTeamData = data.availableTeams.map((team) => {
-                    return (
-                        {
-                            value: team.id,
-                            label: team.name
-                        }
-                    )
-                })
+                    return {
+                        value: team.id,
+                        label: team.name,
+                    };
+                });
 
                 this.setState({
                     selectedCompanyOptions: selectedOptions,
@@ -140,8 +142,8 @@ class EditUser extends React.Component {
                     availableCompanies: mappedCompanyData,
                     availableTeams: mappedTeamData,
                     selectedCompanies: data.visibleIds,
-                    selectedTeams: data.visibleTeamIds
-                })
+                    selectedTeams: data.visibleTeamIds,
+                });
                 document.querySelector("#username").value = data.username;
                 document.querySelector("#role").value = data.role;
                 document.querySelector("#name").value = data.name;
@@ -160,7 +162,12 @@ class EditUser extends React.Component {
                     <CardBody>
                         {this.state.loading ? (
                             <Spin
-                                indicator={<LoadingOutlined style={{fontSize: 44}} spin/>}
+                                indicator={
+                                    <LoadingOutlined
+                                        style={{ fontSize: 44 }}
+                                        spin
+                                    />
+                                }
                                 style={{
                                     height: "calc(100vh - 20rem)",
                                     width: "100%",
@@ -172,42 +179,72 @@ class EditUser extends React.Component {
                         ) : (
                             <>
                                 <div className="d-flex">
-                                    <div style={{flex: 1, marginRight: 20}}>
+                                    <div style={{ flex: 1, marginRight: 20 }}>
                                         <Form>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
                                                     <span>Username</span>
                                                 </Col>
                                                 <Col md="8">
-                                                    <Input type="text" id="username"/>
+                                                    <Input
+                                                        type="text"
+                                                        id="username"
+                                                    />
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
                                                     <span>Password</span>
                                                 </Col>
                                                 <Col md="8">
-                                                    <Input type="text" id="password"/>
+                                                    <Input
+                                                        type="text"
+                                                        id="password"
+                                                    />
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
                                                     <span>Role</span>
                                                 </Col>
                                                 <Col md="8">
-                                                    <CustomInput type="select" name="select" id="role">
-                                                        <option key={2} value={2}>
+                                                    <CustomInput
+                                                        type="select"
+                                                        name="select"
+                                                        id="role"
+                                                    >
+                                                        <option
+                                                            key={2}
+                                                            value={2}
+                                                        >
                                                             updater
                                                         </option>
-                                                        <option key={3} value={3}>
+                                                        <option
+                                                            key={3}
+                                                            value={3}
+                                                        >
                                                             dispatcher
                                                         </option>
                                                     </CustomInput>
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
-                                                    <span>Visible companies</span>
+                                                    <span>
+                                                        Visible companies
+                                                    </span>
                                                 </Col>
                                                 <Col>
                                                     <Select
@@ -215,13 +252,25 @@ class EditUser extends React.Component {
                                                         name="colors"
                                                         className="visible"
                                                         classNamePrefix="select"
-                                                        options={this.state.availableCompanies}
-                                                        onChange={this.handleCompanySelect}
-                                                        value={this.state.selectedCompanyOptions}
+                                                        options={
+                                                            this.state
+                                                                .availableCompanies
+                                                        }
+                                                        onChange={
+                                                            this
+                                                                .handleCompanySelect
+                                                        }
+                                                        value={
+                                                            this.state
+                                                                .selectedCompanyOptions
+                                                        }
                                                     />
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
                                                     <span>Visible teams</span>
                                                 </Col>
@@ -231,39 +280,66 @@ class EditUser extends React.Component {
                                                         name="colors"
                                                         className="visible"
                                                         classNamePrefix="select"
-                                                        options={this.state.availableTeams}
-                                                        onChange={this.handleTeamSelect}
-                                                        value={this.state.selectedTeamOptions}
+                                                        options={
+                                                            this.state
+                                                                .availableTeams
+                                                        }
+                                                        onChange={
+                                                            this
+                                                                .handleTeamSelect
+                                                        }
+                                                        value={
+                                                            this.state
+                                                                .selectedTeamOptions
+                                                        }
                                                     />
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
                                                     <span>Name</span>
                                                 </Col>
                                                 <Col md="8">
-                                                    <Input type="text" id="name"/>
+                                                    <Input
+                                                        type="text"
+                                                        id="name"
+                                                    />
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
                                                     <span>Email</span>
                                                 </Col>
                                                 <Col md="8">
-                                                    <Input type="text" id="email"/>
+                                                    <Input
+                                                        type="text"
+                                                        id="email"
+                                                    />
                                                 </Col>
                                             </FormGroup>
-                                            <FormGroup className="align-items-center" row>
+                                            <FormGroup
+                                                className="align-items-center"
+                                                row
+                                            >
                                                 <Col md="4">
                                                     <span>Phone Number</span>
                                                 </Col>
                                                 <Col md="8">
-                                                    <Input type="text" id="phoneNumber"/>
+                                                    <Input
+                                                        type="text"
+                                                        id="phoneNumber"
+                                                    />
                                                 </Col>
                                             </FormGroup>
                                         </Form>
                                     </div>
-                                    <div style={{width: "50%"}}></div>
+                                    <div style={{ width: "50%" }}></div>
                                 </div>
                                 <Button
                                     color="success"
@@ -271,7 +347,7 @@ class EditUser extends React.Component {
                                     type="button"
                                     onClick={() => this.newUser()}
                                 >
-                                    <Icon.Check size={22}/> Save
+                                    <Icon.Check size={22} /> Save
                                 </Button>
                             </>
                         )}

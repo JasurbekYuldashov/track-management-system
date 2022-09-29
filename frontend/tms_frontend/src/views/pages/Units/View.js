@@ -9,17 +9,14 @@ import {
     Col,
     Button,
 } from "reactstrap";
-import {AgGridReact} from "ag-grid-react";
-import {Link} from "react-router-dom";
-import {connect} from "react-redux";
+import { AgGridReact } from "ag-grid-react";
+import { Link } from "react-router-dom";
+import { connect } from "react-redux";
 import Flatpickr from "react-flatpickr";
-import {
-    toast,
-    Flip,
-} from "react-toastify";
+import { toast, Flip } from "react-toastify";
 import "../../../assets/scss/pages/users.scss";
-import {LoadingOutlined} from "@ant-design/icons";
-import {Spin, Pagination} from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Spin, Pagination } from "antd";
 
 class View extends React.Component {
     state = {
@@ -134,9 +131,10 @@ class View extends React.Component {
         ],
     };
     updateTripsList = () => {
-        this.setState({loading: true});
+        this.setState({ loading: true });
         fetch(
-            `/trip/list?&truck_number=${this.props.match.params.id}&sort=id,DESC&size=40&page=${this.state.page}`,
+            process.env.REACT_APP_BASE_URL +
+                `/trip/list?&truck_number=${this.props.match.params.id}&sort=id,DESC&size=40&page=${this.state.page}`,
             {
                 headers: {
                     Authorization: this.props.token,
@@ -145,7 +143,6 @@ class View extends React.Component {
         )
             .then((res) => res.json())
             .then((data) => {
-
                 let dataToShow = [];
                 data.content.forEach((el) => {
                     let elToShow = {
@@ -166,7 +163,7 @@ class View extends React.Component {
                         teammateName: el.teammateName,
                         teammateId: el.teammateId,
                         rcPrice: el.rcPrice,
-                        revisedRcPrice: el.revisedRcPrice
+                        revisedRcPrice: el.revisedRcPrice,
                     };
                     dataToShow.push(elToShow);
                 });
@@ -179,27 +176,36 @@ class View extends React.Component {
             });
     };
     setStatus = (id) => {
-        fetch(`/unit/update_status/${this.state.id}/${id}`, {
-            headers: {
-                Authorization: this.props.token,
-                "Content-Type": "application/json",
-            },
-            method: "PUT",
-            body: JSON.stringify({
-                eldUnTil:
-                    this.state.status == 7 && document.querySelector("#eldUnTil")
-                        ? Date.parse(document.querySelector("#eldUnTil").value)
-                        : null,
-            }),
-        }).then((res) => {
+        fetch(
+            process.env.REACT_APP_BASE_URL +
+                `/unit/update_status/${this.state.id}/${id}`,
+            {
+                headers: {
+                    Authorization: this.props.token,
+                    "Content-Type": "application/json",
+                },
+                method: "PUT",
+                body: JSON.stringify({
+                    eldUnTil:
+                        this.state.status === 7 &&
+                        document.querySelector("#eldUnTil")
+                            ? Date.parse(
+                                  document.querySelector("#eldUnTil").value
+                              )
+                            : null,
+                }),
+            }
+        ).then((res) => {
             if (res.ok) {
-                toast.success("Status successfuly changed", {transition: Flip});
+                toast.success("Status successfuly changed", {
+                    transition: Flip,
+                });
                 this.setState({
                     status: id,
                     statusChanged: false,
                 });
             } else {
-                toast.error("Something went wrong", {transition: Flip});
+                toast.error("Something went wrong", { transition: Flip });
                 res.text();
             }
         });
@@ -216,22 +222,21 @@ class View extends React.Component {
         }
     }
 
-    antIcon = (<LoadingOutlined style={{fontSize: 44}} spin/>);
+    antIcon = (<LoadingOutlined style={{ fontSize: 44 }} spin />);
 
     componentDidMount() {
         this.updateTripsList();
-        fetch("/state_province/all", {
+        fetch(process.env.REACT_APP_BASE_URL + "/state_province/all", {
             headers: {
                 Authorization: this.props.token,
             },
         })
             .then((res) => res.json())
             .then((data) => {
-
                 this.setState({
                     states: data,
                 });
-                fetch("/unit/context", {
+                fetch(process.env.REACT_APP_BASE_URL + "/unit/context", {
                     headers: {
                         Authorization: this.props.token,
                     },
@@ -241,11 +246,15 @@ class View extends React.Component {
                         this.setState({
                             unitStatuses: data.unit_statuses,
                         });
-                        fetch(`/unit/${this.props.match.params.id}`, {
-                            headers: {
-                                Authorization: this.props.token,
-                            },
-                        })
+                        fetch(
+                            process.env.REACT_APP_BASE_URL +
+                                `/unit/${this.props.match.params.id}`,
+                            {
+                                headers: {
+                                    Authorization: this.props.token,
+                                },
+                            }
+                        )
                             .then((res) => res.json())
                             .then((data) => {
                                 if (data.files !== null) {
@@ -256,7 +265,10 @@ class View extends React.Component {
                                             id: parseInt(key),
                                             name: data.files[key],
                                         });
-                                        fileIds.set(parseInt(key), data.files[key]);
+                                        fileIds.set(
+                                            parseInt(key),
+                                            data.files[key]
+                                        );
                                     }
                                     this.setState({
                                         prevFiles,
@@ -268,7 +280,7 @@ class View extends React.Component {
                                     data: data,
                                     status: data.unitStatusId,
                                     eldUnTil: data.eldUnTil,
-                                    initialLocation: data.initialLocation
+                                    initialLocation: data.initialLocation,
                                 });
                             });
                     });
@@ -276,7 +288,7 @@ class View extends React.Component {
     }
 
     render() {
-        let {data} = this.state;
+        let { data } = this.state;
         return (
             <React.Fragment>
                 <Row>
@@ -297,29 +309,46 @@ class View extends React.Component {
                                                                 <div className="user-info-title font-weight-bold">
                                                                     Number
                                                                 </div>
-                                                                <div>{data.number}</div>
+                                                                <div>
+                                                                    {
+                                                                        data.number
+                                                                    }
+                                                                </div>
                                                             </div>
                                                             <div className="d-flex user-info">
                                                                 <div className="user-info-title font-weight-bold">
                                                                     Type
                                                                 </div>
                                                                 <div className="text-truncate">
-                                                                    <span>{data.unitTypeName}</span>
+                                                                    <span>
+                                                                        {
+                                                                            data.unitTypeName
+                                                                        }
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                             <div className="d-flex user-info">
                                                                 <div className="user-info-title font-weight-bold">
-                                                                    Ownership Type
+                                                                    Ownership
+                                                                    Type
                                                                 </div>
                                                                 <div className="text-truncate">
-                                                                    <span>{data.unitName}</span>
+                                                                    <span>
+                                                                        {
+                                                                            data.unitName
+                                                                        }
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                             <div className="d-flex user-info">
                                                                 <div className="user-info-title font-weight-bold">
                                                                     Description
                                                                 </div>
-                                                                <div>{data.description}</div>
+                                                                <div>
+                                                                    {
+                                                                        data.description
+                                                                    }
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     </Col>
@@ -327,17 +356,27 @@ class View extends React.Component {
                                                         <div className="users-page-view-table">
                                                             <div className="d-flex user-info">
                                                                 <div className="user-info-title font-weight-bold">
-                                                                    Initial Location
+                                                                    Initial
+                                                                    Location
                                                                 </div>
                                                                 <div>
-                                                                    {
-                                                                        this.state.initialLocation &&
+                                                                    {this.state
+                                                                        .initialLocation &&
                                                                         this.state.states.find(
-                                                                            (item) => {
-                                                                                return (item.id ===
-                                                                                    parseInt(this.state.initialLocation.stateProvince)
-                                                                                )
-                                                                            }).name}
+                                                                            (
+                                                                                item
+                                                                            ) => {
+                                                                                return (
+                                                                                    item.id ===
+                                                                                    parseInt(
+                                                                                        this
+                                                                                            .state
+                                                                                            .initialLocation
+                                                                                            .stateProvince
+                                                                                    )
+                                                                                );
+                                                                            }
+                                                                        ).name}
                                                                 </div>
                                                             </div>
                                                             <div className="d-flex user-info">
@@ -345,10 +384,15 @@ class View extends React.Component {
                                                                     City
                                                                 </div>
                                                                 <div>
-                                  <span>
-                                    {this.state.initialLocation &&
-                                    this.state.initialLocation.city}
-                                  </span>
+                                                                    <span>
+                                                                        {this
+                                                                            .state
+                                                                            .initialLocation &&
+                                                                            this
+                                                                                .state
+                                                                                .initialLocation
+                                                                                .city}
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                             <div className="d-flex user-info">
@@ -356,10 +400,12 @@ class View extends React.Component {
                                                                     Street
                                                                 </div>
                                                                 <div>
-                                  <span>
-                                    {data.initialLocation &&
-                                    data.initialLocation.street}
-                                  </span>
+                                                                    <span>
+                                                                        {data.initialLocation &&
+                                                                            data
+                                                                                .initialLocation
+                                                                                .street}
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -369,19 +415,21 @@ class View extends React.Component {
                                         </Media>
                                     </Col>
                                     <Col className="mt-1 pl-0 d-flex" sm="12">
-                                        {this.props.userRole !== "dispatcher" && <Link
-                                            to={`/unit/edit/${this.props.match.params.id}`}
-                                            className="d-flex align-items-center text-white mr-1"
-                                        >
-                                            <Button
-                                                color="primary"
-                                                className="d-flex align-items-center"
-                                                type="button"
+                                        {this.props.userRole !==
+                                            "dispatcher" && (
+                                            <Link
+                                                to={`/unit/edit/${this.props.match.params.id}`}
+                                                className="d-flex align-items-center text-white mr-1"
                                             >
-                                                Edit Unit
-                                            </Button>
-                                        </Link>
-                                        }
+                                                <Button
+                                                    color="primary"
+                                                    className="d-flex align-items-center"
+                                                    type="button"
+                                                >
+                                                    Edit Unit
+                                                </Button>
+                                            </Link>
+                                        )}
                                         {this.state.status === 7 && (
                                             <>
                                                 <Flatpickr
@@ -397,7 +445,10 @@ class View extends React.Component {
                                                     value={this.state.eldUnTil}
                                                     onChange={(e) => {
                                                         this.setState({
-                                                            eldUnTil: Date.parse(e[0]),
+                                                            eldUnTil:
+                                                                Date.parse(
+                                                                    e[0]
+                                                                ),
                                                         });
                                                     }}
                                                 />
@@ -408,7 +459,11 @@ class View extends React.Component {
                                                 color="success"
                                                 className="d-flex align-items-center ml-1"
                                                 type="button"
-                                                onClick={() => this.setStatus(this.state.status)}
+                                                onClick={() =>
+                                                    this.setStatus(
+                                                        this.state.status
+                                                    )
+                                                }
                                             >
                                                 Submit
                                             </Button>
@@ -426,11 +481,15 @@ class View extends React.Component {
                             <CardBody>
                                 <div className="users-page-view-table">
                                     <div className="d-flex user-info">
-                                        <div className="user-info-title font-weight-bold">VIN</div>
+                                        <div className="user-info-title font-weight-bold">
+                                            VIN
+                                        </div>
                                         <div>{data.vin}</div>
                                     </div>
                                     <div className="d-flex user-info">
-                                        <div className="user-info-title font-weight-bold">Make</div>
+                                        <div className="user-info-title font-weight-bold">
+                                            Make
+                                        </div>
                                         <div>{data.make}</div>
                                     </div>
                                     <div className="d-flex user-info">
@@ -450,7 +509,9 @@ class View extends React.Component {
                                         </div>
                                     </div>
                                     <div className="d-flex user-info">
-                                        <div className="user-info-title font-weight-bold">Year</div>
+                                        <div className="user-info-title font-weight-bold">
+                                            Year
+                                        </div>
                                         <div className="text-truncate">
                                             <span>{data.year}</span>
                                         </div>
@@ -468,7 +529,9 @@ class View extends React.Component {
                             <CardBody>
                                 <div className="users-page-view-table">
                                     <div className="d-flex user-info">
-                                        <div className="user-info-title font-weight-bold">Make</div>
+                                        <div className="user-info-title font-weight-bold">
+                                            Make
+                                        </div>
                                         <div>{data.make}</div>
                                     </div>
                                     <div className="d-flex user-info">
@@ -484,7 +547,9 @@ class View extends React.Component {
                                             License Plate Number
                                         </div>
                                         <div className="text-truncate">
-                                            <span>{data.licensePlateNumbe}</span>
+                                            <span>
+                                                {data.licensePlateNumbe}
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="d-flex user-info">
@@ -492,7 +557,11 @@ class View extends React.Component {
                                             License Plate Expiration
                                         </div>
                                         <div className="text-truncate">
-                                            <span>{data.licenseExpirationFormatted}</span>
+                                            <span>
+                                                {
+                                                    data.licenseExpirationFormatted
+                                                }
+                                            </span>
                                         </div>
                                     </div>
                                     <div className="d-flex user-info">
@@ -500,7 +569,11 @@ class View extends React.Component {
                                             Inspection Sticker Expiration
                                         </div>
                                         <div className="text-truncate">
-                                            <span>{data.inspectionStickerExpirationFormatted}</span>
+                                            <span>
+                                                {
+                                                    data.inspectionStickerExpirationFormatted
+                                                }
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -514,30 +587,33 @@ class View extends React.Component {
                             </CardHeader>
                             <CardBody>
                                 {this.state.prevFiles &&
-                                this.state.prevFiles.map((item) => (
-                                    <div
-                                        style={{
-                                            flex: "30%",
-                                            maxWidth: "30%",
-                                            display: "flex",
-                                            alignItems: "center",
-                                        }}
-                                    >
+                                    this.state.prevFiles.map((item) => (
                                         <div
-                                            style={{width: 225, cursor: "pointer"}}
-                                            className="mt-1"
-                                            href={`${window.location.origin}/file/${item.id}`}
-                                            onClick={() =>
-                                                window.open(
-                                                    `${window.location.origin}/file/${item.id}`,
-                                                    "_blank"
-                                                )
-                                            }
+                                            style={{
+                                                flex: "30%",
+                                                maxWidth: "30%",
+                                                display: "flex",
+                                                alignItems: "center",
+                                            }}
                                         >
-                                            {item.name}
+                                            <div
+                                                style={{
+                                                    width: 225,
+                                                    cursor: "pointer",
+                                                }}
+                                                className="mt-1"
+                                                href={`${window.location.origin}/file/${item.id}`}
+                                                onClick={() =>
+                                                    window.open(
+                                                        `${window.location.origin}/file/${item.id}`,
+                                                        "_blank"
+                                                    )
+                                                }
+                                            >
+                                                {item.name}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))}
                             </CardBody>
                         </Card>
                     </Col>
@@ -596,7 +672,7 @@ class View extends React.Component {
 const mapStateToProps = (state) => {
     return {
         token: state.auth.login.token,
-        userRole: state.auth.login.userRole
+        userRole: state.auth.login.userRole,
     };
 };
 export default connect(mapStateToProps)(View);

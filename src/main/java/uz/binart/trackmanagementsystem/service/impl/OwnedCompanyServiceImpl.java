@@ -1,10 +1,14 @@
 package uz.binart.trackmanagementsystem.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import uz.binart.trackmanagementsystem.dto.OwnedCompanyListDto;
 import uz.binart.trackmanagementsystem.exception.FieldLimitException;
 import uz.binart.trackmanagementsystem.exception.IllegalChangeAttemptException;
+import uz.binart.trackmanagementsystem.mapper.OwnedCompanyMapper;
 import uz.binart.trackmanagementsystem.model.OwnedCompany;
 import uz.binart.trackmanagementsystem.model.StateProvince;
 import uz.binart.trackmanagementsystem.repository.OwnedCompanyRepository;
@@ -29,6 +33,8 @@ public class OwnedCompanyServiceImpl implements OwnedCompanyService {
     private final ActionService actionService;
     private final StateProvinceService stateProvinceService;
     private Map<Long, OwnedCompany> cache;
+
+    private OwnedCompanyMapper ownedCompanyMapper;
 
     @PostConstruct
     public void initCache(){

@@ -1,4 +1,3 @@
-
 import React from "react";
 
 import {
@@ -15,12 +14,9 @@ import {
 
 import * as Icon from "react-feather";
 
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 
-import {
-    toast,
-    Flip,
-} from "react-toastify";
+import { toast, Flip } from "react-toastify";
 
 import Select from "react-select";
 
@@ -33,65 +29,69 @@ class NewCompany extends React.Component {
         availableCompanies: [],
         selectedCompanyOptions: [],
         availableTeams: [],
-        selectedTeamOptions: []
+        selectedTeamOptions: [],
     };
 
-    handleSelect = (array) =>{
+    handleSelect = (array) => {
+        let mappedCompanies = [];
+        if (array != null)
+            mappedCompanies = array.map((element) => {
+                return element.value;
+            });
 
-        let mappedCompanies = []
-        if(array != null)
-        mappedCompanies = array.map((element) => {
-            return element.value;
-        })
-
-        this.setState({selectedCompanies : mappedCompanies, selectedCompanyOptions: array})
-    }
+        this.setState({
+            selectedCompanies: mappedCompanies,
+            selectedCompanyOptions: array,
+        });
+    };
 
     handleTeamSelect = (array) => {
-        let mappedTeams = []
-        if(array != null)
+        let mappedTeams = [];
+        if (array != null)
             mappedTeams = array.map((element) => {
                 return element.value;
-            })
+            });
 
-        this.setState({selectedTeams: mappedTeams, selectedTeamOptions: array})
-    }
+        this.setState({
+            selectedTeams: mappedTeams,
+            selectedTeamOptions: array,
+        });
+    };
 
     getAvailableAndSelectedCompaniesAndTeams = async () => {
-        let dataForAddNewUser = await fetch('/admin/user_context', {
-            headers: {
-                Authorization: this.props.token,
-                "Content-Type": "application/json",
+        let dataForAddNewUser = await fetch(
+            process.env.REACT_APP_BASE_URL + "/admin/user_context",
+            {
+                headers: {
+                    Authorization: this.props.token,
+                    "Content-Type": "application/json",
+                },
             }
-        });
+        );
         let context = await dataForAddNewUser.json();
         return context.data;
-    }
+    };
 
     async componentDidMount() {
-        let data = await this.getAvailableAndSelectedCompaniesAndTeams()
+        let data = await this.getAvailableAndSelectedCompaniesAndTeams();
 
         let mappedCompaniesData = data.companies.map((elem) => {
-            return (
-                {
-                    value: elem.id,
-                    label: elem.name
-                }
-            )
-        })
+            return {
+                value: elem.id,
+                label: elem.name,
+            };
+        });
 
         let mappedTeamsData = data.teams.map((elem) => {
-            return (
-                {
-                    value: elem.id,
-                    label: elem.name
-                }
-            )
-        })
+            return {
+                value: elem.id,
+                label: elem.name,
+            };
+        });
 
         this.setState({
             availableCompanies: mappedCompaniesData,
-            availableTeams: mappedTeamsData
+            availableTeams: mappedTeamsData,
         });
     }
 
@@ -104,10 +104,10 @@ class NewCompany extends React.Component {
             email: document.querySelector("#email").value,
             phone: document.querySelector("#phoneNumber").value,
             visibleIds: this.state.selectedCompanies,
-            visibleTeamIds: this.state.selectedTeams
+            visibleTeamIds: this.state.selectedTeams,
         };
 
-        fetch("/admin/create_user", {
+        fetch(process.env.REACT_APP_BASE_URL + "/admin/create_user", {
             headers: {
                 Authorization: this.props.token,
                 "Content-Type": "application/json",
@@ -116,10 +116,10 @@ class NewCompany extends React.Component {
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.ok) {
-                toast.success("User successfully added", {transition: Flip});
+                toast.success("User successfully added", { transition: Flip });
                 window.history.back();
             } else {
-                toast.error("Something went wrong", {transition: Flip});
+                toast.error("Something went wrong", { transition: Flip });
                 res.text();
             }
         });
@@ -134,30 +134,43 @@ class NewCompany extends React.Component {
                     </CardHeader>
                     <CardBody>
                         <div className="d-flex">
-                            <div style={{flex: 1, marginRight: 20}}>
+                            <div style={{ flex: 1, marginRight: 20 }}>
                                 <Form>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Username</span>
                                         </Col>
                                         <Col md="8">
-                                            <Input type="text" id="username"/>
+                                            <Input type="text" id="username" />
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Password</span>
                                         </Col>
                                         <Col md="8">
-                                            <Input type="text" id="password"/>
+                                            <Input type="text" id="password" />
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Role</span>
                                         </Col>
                                         <Col md="8">
-                                            <CustomInput type="select" name="select" id="role">
+                                            <CustomInput
+                                                type="select"
+                                                name="select"
+                                                id="role"
+                                            >
                                                 <option key={2} value={2}>
                                                     updater
                                                 </option>
@@ -167,7 +180,10 @@ class NewCompany extends React.Component {
                                             </CustomInput>
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Visible companies</span>
                                         </Col>
@@ -177,13 +193,22 @@ class NewCompany extends React.Component {
                                                 name="colors"
                                                 className="visible"
                                                 classNamePrefix="select"
-                                                options={this.state.availableCompanies}
+                                                options={
+                                                    this.state
+                                                        .availableCompanies
+                                                }
                                                 onChange={this.handleSelect}
-                                                value={this.state.selectedCompanyOptions}
+                                                value={
+                                                    this.state
+                                                        .selectedCompanyOptions
+                                                }
                                             />
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Visible teams</span>
                                         </Col>
@@ -193,39 +218,56 @@ class NewCompany extends React.Component {
                                                 name="colors"
                                                 className="visible"
                                                 classNamePrefix="select"
-                                                options={this.state.availableTeams}
+                                                options={
+                                                    this.state.availableTeams
+                                                }
                                                 onChange={this.handleTeamSelect}
-                                                value={this.state.selectedTeamOptions}
+                                                value={
+                                                    this.state
+                                                        .selectedTeamOptions
+                                                }
                                             />
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Name</span>
                                         </Col>
                                         <Col md="8">
-                                            <Input type="text" id="name"/>
+                                            <Input type="text" id="name" />
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Email</span>
                                         </Col>
                                         <Col md="8">
-                                            <Input type="text" id="email"/>
+                                            <Input type="text" id="email" />
                                         </Col>
                                     </FormGroup>
-                                    <FormGroup className="align-items-center" row>
+                                    <FormGroup
+                                        className="align-items-center"
+                                        row
+                                    >
                                         <Col md="4">
                                             <span>Phone Number</span>
                                         </Col>
                                         <Col md="8">
-                                            <Input type="text" id="phoneNumber"/>
+                                            <Input
+                                                type="text"
+                                                id="phoneNumber"
+                                            />
                                         </Col>
                                     </FormGroup>
                                 </Form>
                             </div>
-                            <div style={{width: "50%"}}></div>
+                            <div style={{ width: "50%" }}></div>
                         </div>
                         <Button
                             color="success"
@@ -233,7 +275,7 @@ class NewCompany extends React.Component {
                             type="button"
                             onClick={() => this.newUser()}
                         >
-                            <Icon.Check size={22}/> Save user
+                            <Icon.Check size={22} /> Save user
                         </Button>
                     </CardBody>
                 </Card>

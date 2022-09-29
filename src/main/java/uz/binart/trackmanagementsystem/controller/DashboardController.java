@@ -8,7 +8,9 @@ import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Pair;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -127,11 +129,9 @@ public class DashboardController {
     public Map<String, Object> dashboard(
             @RequestParam(name = "currentEmployerId", required = false) Long currentEmployerId,
             @RequestParam(name = "teamId", required = false) Long teamId,
-            Pageable pageable,
-            @RequestParam(name = "startTime") Long startTime,
-            @RequestParam(name = "endTime") Long endTime
+            @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable
     ) throws JSONException {
-        System.out.println(teamId);
+//        System.out.println(teamId);
 
         UnitDto unitDto = new UnitDto();
 
@@ -146,44 +146,57 @@ public class DashboardController {
         unitDto.setVisibleIds(visibleIds);
         unitDto.setVisibleTeamIds(visibleTeamIds);
 
-        unitDto.setUnitStatusId(3L);
+//        unitDto.setUnitStatusId(3L);
         Page<Unit> ready = unitService.findFiltered(unitDto, pageable);
 
-        unitDto.setUnitStatusId(2L);
-        Page<Unit> upcoming = unitService.findFiltered(unitDto, pageable);
-
-        unitDto.setUnitStatusId(1L);
-        Page<Unit> covered = unitService.findFiltered(unitDto, pageable);
-
-        unitDto.setUnitStatusId(4L);
-        Page<Unit> noDriver = unitService.findFiltered(unitDto, pageable);
-
-        unitDto.setUnitStatusId(5L);
-        Page<Unit> repair = unitService.findFiltered(unitDto, pageable);
-
-        unitDto.setUnitStatusId(7L);
-        Page<Unit> waitingForEld = unitService.findFiltered(unitDto, pageable);
-
-        unitDto.setUnitStatusId(8L);
-        Page<Unit> atHome = unitService.findFiltered(unitDto, pageable);
+//        unitDto.setUnitStatusId(2L);
+//        Page<Unit> upcoming = unitService.findFiltered(unitDto, pageable);
+//
+//        unitDto.setUnitStatusId(1L);
+//        Page<Unit> covered = unitService.findFiltered(unitDto, pageable);
+//
+//        unitDto.setUnitStatusId(4L);
+//        Page<Unit> noDriver = unitService.findFiltered(unitDto, pageable);
+//
+//        unitDto.setUnitStatusId(5L);
+//        Page<Unit> repair = unitService.findFiltered(unitDto, pageable);
+//
+//        unitDto.setUnitStatusId(7L);
+//        Page<Unit> waitingForEld = unitService.findFiltered(unitDto, pageable);
+//
+//        unitDto.setUnitStatusId(8L);
+//        Page<Unit> atHome = unitService.findFiltered(unitDto, pageable);
 
         List<UnitDashboardDto> unitDtoList = new ArrayList<>();
 
         Map<String, Object> map = new HashMap<>();
 
-        unitDtoList.addAll(packToDto(ready.getContent()));
-        unitDtoList.addAll(packToDto(waitingForEld.getContent()));
-        unitDtoList.addAll(packToDto(upcoming.getContent()));
-        unitDtoList.addAll(packToDto(covered.getContent()));
-        unitDtoList.addAll(packToDto(atHome.getContent()));
-        unitDtoList.addAll(packToDto(repair.getContent()));
-        unitDtoList.addAll(packToDto(noDriver.getContent()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+        HttpEntity<String> entity = new HttpEntity<String>(headers);
+
+        ResponseEntity<String> time = restTemplate.exchange("https://timeapi.io/api/Time/current/zone?timeZone=America/Chicago", HttpMethod.GET, entity, String.class);
+        JSONObject jsonObject = new JSONObject(time.getBody());
+//        System.out.println(time.getBody());
+
+        LocalDateTime dateTime = LocalDateTime.parse(jsonObject.get("dateTime").toString());
+
+        unitDtoList.addAll(packToDto(ready.getContent(), dateTime));
+//        unitDtoList.addAll(packToDto(waitingForEld.getContent()));
+//        unitDtoList.addAll(packToDto(upcoming.getContent()));
+//        unitDtoList.addAll(packToDto(covered.getContent()));
+//        unitDtoList.addAll(packToDto(atHome.getContent()));
+//        unitDtoList.addAll(packToDto(repair.getContent()));
+//        unitDtoList.addAll(packToDto(noDriver.getContent()));
 //        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("Europe/Madrid"));
 //        calendar.add(Calendar.HOUR_OF_DAY, 0);
 //        Date date = new Date();
 //        Long currentTime = date.getTime();
 //        Long lastSaturday = getLastSaturday();
-        Long minusTime = endTime - startTime;
+//        Long minusTime = endTime - startTime;
+
+
 
         for (int i = 0; i < unitDtoList.size(); i++) {
             UnitDashboardDto asd = unitDtoList.get(i);
@@ -194,7 +207,7 @@ public class DashboardController {
 ////                String s1 = tripRepository.test111(asd.getTruckId());
 //
 //            }
-            System.out.println(asd.getEndTime());
+//            System.out.println(asd.getEndTime());
             try {
                 if (asd.getTruckId() != null) {
 //                    List<String> ids = tripRepository.test1(asd.getTruckId());
@@ -204,16 +217,14 @@ public class DashboardController {
 //
 //                    start.setTime(new Date(currentTime));
 //                    end.setTime(new Date(lastSaturday));
-                    List<AccountingDto> loadss = accountingService.getProperInfo(null, asd.getTruckId(), null, null, null, startTime, endTime, true, false);
+                    List<AccountingDto> loadss = accountingService.getProperInfo(null, asd.getTruckId(), null, null, null, dateTime, true, false);
                     float a = 0;
                     for (AccountingDto accountingDto : loadss) {
                         try {
                             for (int k = 0; k < accountingDto.getSegmentedPrices().length; k++) {
                                 a += accountingDto.getSegmentedPrices()[k];
                             }
-                        } catch (Exception ignored) {
-
-                        }
+                        } catch (Exception ignored) {}
                     }
                     asd.setCalc(a);
                     asd.setCalc1(a);
@@ -222,14 +233,18 @@ public class DashboardController {
             } catch (Exception ignored) {
             }
         }
+        map.put("page", ready.getNumber());
+        map.put("total_pages", ready.getTotalPages());
+        map.put("total_elements", ready.getTotalElements());
         map.put("data", unitDtoList);
 
         return map;
     }
 
-    List<UnitDashboardDto> packToDto(List<Unit> units) throws JSONException {
+    List<UnitDashboardDto> packToDto(List<Unit> units, LocalDateTime dateTime) throws JSONException {
 
         List<UnitDashboardDto> unitDtoList = new ArrayList<>();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd-YYYY HH:mm");
 
         for (Unit unit : units) {
             UnitDashboardDto dto = new UnitDashboardDto();
@@ -297,10 +312,11 @@ public class DashboardController {
 
                     Company company = companyService.getById(deliveryDto.getConsigneeCompanyId());
 
-                    String correctedViaCentralTimeZoneTime = resolveTime(deliveryDto.getDeliveryDate(), company);
+//                    String correctedViaCentralTimeZoneTime = resolveTime(deliveryDto.getDeliveryDate(), company);
+                    String correctedViaCentralTimeZoneTime = simpleDateFormat.format(deliveryDto.getDeliveryDate());
                     dto.setFrom(pickupDto.getConsigneeNameAndLocation());
                     dto.setTo(deliveryDto.getConsigneeNameAndLocation());
-                    System.out.println(correctedViaCentralTimeZoneTime);
+
                     dto.setEndTime(correctedViaCentralTimeZoneTime);
                 }
                 dto.setTripId(trip.getId());
@@ -310,16 +326,6 @@ public class DashboardController {
                 calendar.add(Calendar.HOUR_OF_DAY, -11);
 //                Long currentTime = calendar.getTimeInMillis();
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-
-                HttpEntity<String> entity = new HttpEntity<String>(headers);
-
-                ResponseEntity<String> time = restTemplate.exchange("https://timeapi.io/api/Time/current/zone?timeZone=America/Chicago", HttpMethod.GET, entity, String.class);
-                JSONObject jsonObject = new JSONObject(time.getBody());
-//        System.out.println(time.getBody());
-
-                LocalDateTime dateTime = LocalDateTime.parse(jsonObject.get("dateTime").toString());
                 Timestamp timestamp = Timestamp.valueOf(dateTime);
 
 //        System.out.println(timestamp.getTime());
@@ -333,7 +339,7 @@ public class DashboardController {
                     dto.setTo(defineLastTripEndingLocationForReadyUnits(unit.getLastCompletedTripId()));
 
             } else if (dto.getUnitStatusId().equals(7L) && unit.getEldUnTil() != null) {
-                SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd-YYYY HH:mm");
+
                 Date result = new Date(unit.getEldUnTil());
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(result);
@@ -365,7 +371,6 @@ public class DashboardController {
                     else if (location.getParentTimeZone().equals(2))
                         timeZone = parentLocation.getSecondTimeZone();
                 }
-
             }
         }
 

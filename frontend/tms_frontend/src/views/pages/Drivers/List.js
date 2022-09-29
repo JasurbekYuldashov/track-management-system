@@ -1,15 +1,15 @@
 import React from "react";
-import {Card, CardBody, Input} from "reactstrap";
-import {AgGridReact} from "ag-grid-react";
-import {Button} from "reactstrap";
+import { Card, CardBody, Input } from "reactstrap";
+import { AgGridReact } from "ag-grid-react";
+import { Button } from "reactstrap";
 import "../../../assets/scss/plugins/tables/_agGridStyleOverride.scss";
 import * as Icon from "react-feather";
-import {connect} from "react-redux";
-import {Link} from "react-router-dom";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import SweetAlert from "react-bootstrap-sweetalert";
-import {history} from "../../../history";
-import {Spin} from "antd";
-import {LoadingOutlined} from "@ant-design/icons";
+import { history } from "../../../history";
+import { Pagination, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 class Drivers extends React.Component {
     state = {
@@ -37,7 +37,6 @@ class Drivers extends React.Component {
                 headerName: "#",
                 field: "index",
                 maxWidth: 50,
-                flex: 1,
                 filter: false,
                 cellStyle: function (params) {
                     return {
@@ -50,7 +49,6 @@ class Drivers extends React.Component {
                 field: "name",
                 minWidth: 100,
                 filter: true,
-                flex: 2,
                 cellRendererFramework: function (params) {
                     return (
                         <Link
@@ -61,14 +59,13 @@ class Drivers extends React.Component {
                         </Link>
                     );
                 },
-                cellStyle: {"white-space": "normal"},
+                cellStyle: { "white-space": "normal" },
             },
             {
                 headerName: "Address",
                 field: "address",
                 filter: true,
                 minWidth: 100,
-                flex: 1,
                 tooltip: (params) => {
                     return params.value;
                 },
@@ -78,21 +75,19 @@ class Drivers extends React.Component {
                 field: "primaryPhone",
                 filter: true,
                 minWidth: 130,
-                flex: 1,
             },
             {
                 headerName: "Alternate phone",
                 field: "alternatePhone",
                 filter: true,
                 minWidth: 130,
-                flex: 1,
             },
             {
                 headerName: "Payment Type",
                 field: "paymentType",
                 filter: true,
                 minWidth: 100,
-                cellStyle: {"white-space": "normal"},
+                cellStyle: { "white-space": "normal" },
             },
             {
                 headerName: "Status",
@@ -102,7 +97,9 @@ class Drivers extends React.Component {
                 cellStyle: function (params) {
                     return {
                         fontSize: "13px",
-                        color: params.data.driverStatusColor ? "white" : "black",
+                        color: params.data.driverStatusColor
+                            ? "white"
+                            : "black",
                         backgroundColor: params.data.driverStatusColor
                             ? params.data.driverStatusColor
                             : "white",
@@ -122,25 +119,21 @@ class Drivers extends React.Component {
                 field: "hiredOn",
                 filter: true,
                 minWidth: 100,
-                flex: 1,
             },
             {
                 headerName: "License exp",
                 field: "licenseExp",
                 filter: "agNumberColumnFilter",
                 minWidth: 100,
-                flex: 1,
             },
             {
                 headerName: "Medical Card Exp",
                 field: "medicalCardExp",
                 filter: "agNumberColumnFilter",
                 minWidth: 100,
-                flex: 1,
             },
             {
                 maxWidth: 100,
-                flex: 1,
                 headerName: "Actions",
                 field: "actions",
                 sortable: false,
@@ -150,24 +143,32 @@ class Drivers extends React.Component {
                     return (
                         <div>
                             <Link to={`/driver/view/${params.data.id}`}>
-                                <Icon.Eye className="icon-button" size={20} color="darkgray"/>
+                                <Icon.Eye
+                                    className="icon-button"
+                                    size={20}
+                                    color="darkgray"
+                                />
                             </Link>
-                            {this.props.userRole !== "dispatcher" && <Link to={`/driver/edit/${params.data.id}`}>
-                                <Icon.Edit
-                                    onClick={() => history.push()}
+                            {this.props.userRole !== "dispatcher" && (
+                                <Link to={`/driver/edit/${params.data.id}`}>
+                                    <Icon.Edit
+                                        onClick={() => history.push()}
+                                        className="icon-button ml-1"
+                                        size={20}
+                                        color="darkgray"
+                                    />
+                                </Link>
+                            )}
+                            {this.props.userRole !== "dispatcher" && (
+                                <Icon.Delete
+                                    onClick={() =>
+                                        this.nominateToDelete(params.data.id)
+                                    }
                                     className="icon-button ml-1"
                                     size={20}
                                     color="darkgray"
                                 />
-                            </Link>}
-                            {this.props.userRole !== "dispatcher" &&
-                            <Icon.Delete
-                                onClick={() => this.nominateToDelete(params.data.id)}
-                                className="icon-button ml-1"
-                                size={20}
-                                color="darkgray"
-                            />
-                            }
+                            )}
                         </div>
                     );
                 },
@@ -181,12 +182,15 @@ class Drivers extends React.Component {
         });
     };
     deleteDriver = () => {
-        fetch(`/driver/${this.state.deletingId}`, {
-            headers: {
-                Authorization: this.props.token,
-            },
-            method: "DELETE",
-        }).then((res) => {
+        fetch(
+            process.env.REACT_APP_BASE_URL + `/driver/${this.state.deletingId}`,
+            {
+                headers: {
+                    Authorization: this.props.token,
+                },
+                method: "DELETE",
+            }
+        ).then((res) => {
             this.updateInfo(0);
         });
         this.setState({
@@ -206,7 +210,8 @@ class Drivers extends React.Component {
 
     updateInfo = (pageNumber) => {
         let name =
-            document.getElementById("name") && document.getElementById("name").value;
+            document.getElementById("name") &&
+            document.getElementById("name").value;
         let phone =
             document.getElementById("phone") &&
             document.getElementById("phone").value;
@@ -214,9 +219,10 @@ class Drivers extends React.Component {
             loading: true,
         });
         fetch(
-            `/driver/list?sort=id,DESC&size=10000&page=${pageNumber}${
-                name && `&searchNameText=${name}`
-            }${phone && `&phone=${phone}`}`,
+            process.env.REACT_APP_BASE_URL +
+                `/driver/list?sort=id,DESC&size=10&page=${pageNumber}${
+                    name && `&searchNameText=${name}`
+                }${phone && `&phone=${phone}`}`,
             {
                 headers: {
                     Authorization: this.props.token,
@@ -236,20 +242,23 @@ class Drivers extends React.Component {
                         return;
                 let dataToShow = [];
                 data.content.forEach((el, i) => {
-                    let paymentTypeId = this.state.paymentTypes.filter((obj) => {
-                        return obj.id === el.defaultPaymentTypeId;
-                    });
+                    let paymentTypeId = this.state.paymentTypes.filter(
+                        (obj) => {
+                            return obj.id === el.defaultPaymentTypeId;
+                        }
+                    );
                     let stateId = this.state.states.filter((obj) => {
                         return obj.id === el.stateProvinceId;
                     });
                     let elToShow = {
-                        index: i + 1,
+                        index: i + 1 + pageNumber * 10,
                         id: el.id,
                         name: el.lastName + " " + el.firstName,
                         address: stateId[0] && stateId[0].name,
                         primaryPhone: el.phone,
                         alternatePhone: el.alternatePhone,
-                        paymentType: paymentTypeId.length > 0 && paymentTypeId[0].name,
+                        paymentType:
+                            paymentTypeId.length > 0 && paymentTypeId[0].name,
                         status: el.driverStatusId,
                         hiredOn: el.hireDateFormatted,
                         licenseExp: el.licenseExpirationFormatted,
@@ -270,7 +279,7 @@ class Drivers extends React.Component {
         this.setState({
             loading: true,
         });
-        fetch("/state_province/all", {
+        fetch(process.env.REACT_APP_BASE_URL + "/state_province/all", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -281,7 +290,7 @@ class Drivers extends React.Component {
                     states: data,
                 })
             );
-        fetch("/driver/context", {
+        fetch(process.env.REACT_APP_BASE_URL + "/driver/context", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -296,7 +305,7 @@ class Drivers extends React.Component {
             });
     }
 
-    antIcon = (<LoadingOutlined style={{fontSize: 44}} spin/>);
+    antIcon = (<LoadingOutlined style={{ fontSize: 44 }} spin />);
 
     pageChanged = (page) => {
         this.setState({
@@ -305,7 +314,7 @@ class Drivers extends React.Component {
     };
 
     render() {
-        const {columnDefs, defaultColDef} = this.state;
+        const { columnDefs, defaultColDef } = this.state;
         return (
             <>
                 <SweetAlert
@@ -320,7 +329,7 @@ class Drivers extends React.Component {
                     onConfirm={() => {
                         this.deleteDriver(this.state.deletingId);
                     }}
-                    onCancel={() => this.setState({deleteAlert: false})}
+                    onCancel={() => this.setState({ deleteAlert: false })}
                 >
                     You won't be able to revert this!
                 </SweetAlert>
@@ -328,7 +337,9 @@ class Drivers extends React.Component {
                     <div className="d-flex justify-content-between align-items-center mt-2 mx-2 mb-1">
                         <h3 className="mb-0">All drivers list</h3>
                         <div className="d-flex align-items-center">
-                            <h4 className="mx-1 mb-0 text-nowrap">Global search</h4>
+                            <h4 className="mx-1 mb-0 text-nowrap">
+                                Global search
+                            </h4>
                             <Input
                                 type="text"
                                 placeholder="name"
@@ -354,25 +365,26 @@ class Drivers extends React.Component {
                                     className="d-flex align-items-center"
                                     type="button"
                                 >
-                                    <Icon.Plus size={20}/> Add new driver
+                                    <Icon.Plus size={20} /> Add new driver
                                 </Button>
                             </Link>
                         </div>
                     </div>
-                    <CardBody className="py-0 no-pagination">
-                        {this.state.loading ? (
-                            <Spin
-                                indicator={this.antIcon}
-                                style={{
-                                    height: "calc(100vh - 20rem)",
-                                    width: "100%",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                            />
-                        ) : (
-                            <>
+
+                    {this.state.loading ? (
+                        <Spin
+                            indicator={this.antIcon}
+                            style={{
+                                height: "calc(100vh - 20rem)",
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                        />
+                    ) : (
+                        <>
+                            <CardBody className="py-0 no-pagination">
                                 <div className="ag-theme-material w-100 ag-grid-table">
                                     <AgGridReact
                                         enableCellTextSelection="true"
@@ -388,9 +400,20 @@ class Drivers extends React.Component {
                                         pivotPanelShow="always"
                                     />
                                 </div>
-                            </>
-                        )}
-                    </CardBody>
+                                <Pagination
+                                    current={this.state.page + 1}
+                                    total={this.state.total}
+                                    onChange={this.pageChanged}
+                                    pageSize={10}
+                                    style={{
+                                        textAlign: "center",
+                                        margin: "20px",
+                                        marginBottom: "50px",
+                                    }}
+                                />
+                            </CardBody>
+                        </>
+                    )}
                 </Card>
             </>
         );
@@ -398,10 +421,9 @@ class Drivers extends React.Component {
 }
 
 const mapStateToProps = (state) => {
-
     return {
         token: state.auth.login.token,
-        userRole: state.auth.login.userRole
+        userRole: state.auth.login.userRole,
     };
 };
 export default connect(mapStateToProps)(Drivers);

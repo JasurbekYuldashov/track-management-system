@@ -86,10 +86,7 @@ public class TripController {
         }
 
         map.put("loads", loads);
-
         map.put("trip", packagingService.packTripToDto(trip));
-
-
 
         return ResponseEntity.ok(map);
     }
@@ -183,11 +180,13 @@ public class TripController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<Map<String, Object>> getList(@RequestParam(name = "company_id", required = false)String id, @RequestParam(name = "status_id", required = false)Long statusId, @RequestParam(name = "truck_number", required = false, defaultValue = "")String truckNumber, @PageableDefault( sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable){
+    public ResponseEntity<Map<String, Object>> getList(@RequestParam(name = "company_id", required = false) String id,
+                                                       @RequestParam(name = "status_id", required = false)Long statusId,
+                                                       @RequestParam(name = "truck_number", required = false, defaultValue = "") String truckNumber,
+                                                       @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable){
 
         TripDto tripDto = new TripDto();
         id = StringUtils.trimToNull(id);
-
 
         List<Long> visibleIds = utilService.getVisibleIds(userService.getCurrentUserFromContext());
         tripDto.setVisibleIds(visibleIds);

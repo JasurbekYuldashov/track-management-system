@@ -14,6 +14,7 @@ import * as Icon from "react-feather";
 import Flatpickr from "react-flatpickr";
 import AsyncSelect from "react-select/async";
 import { toast, Flip } from "react-toastify";
+
 class PDeliveryModal extends React.Component {
     state = {
         consignee: null,
@@ -30,11 +31,15 @@ class PDeliveryModal extends React.Component {
             this.props.modal &&
             this.props.editingChildId
         ) {
-            fetch(`/delivery/${this.props.editingChildId}`, {
-                headers: {
-                    Authorization: this.props.token,
-                },
-            })
+            fetch(
+                process.env.REACT_APP_BASE_URL +
+                    `/delivery/${this.props.editingChildId}`,
+                {
+                    headers: {
+                        Authorization: this.props.token,
+                    },
+                }
+            )
                 .then((res) => res.json())
                 .then((data) => {
                     let selectedValue = {
@@ -89,14 +94,14 @@ class PDeliveryModal extends React.Component {
             this.setState({
                 searchVal: val,
             });
-            fetch(`/company/search?q=${val}`, {
+            fetch(process.env.REACT_APP_BASE_URL + `/company/search?q=${val}`, {
                 headers: {
                     Authorization: this.props.token,
                 },
             })
                 .then((res) => res.json())
                 .then((data) => {
-                    if (val == this.state.searchVal) {
+                    if (val === this.state.searchVal) {
                         let dataToShow = [];
                         data.forEach((el) => {
                             let elToShow = {
@@ -138,7 +143,7 @@ class PDeliveryModal extends React.Component {
             this.props.editingChildId !== undefined
         ) {
             sendingData.id = this.props.editingChildId;
-            fetch("/delivery/edit", {
+            fetch(process.env.REACT_APP_BASE_URL + "/delivery/edit", {
                 headers: {
                     Authorization: this.props.token,
                     "Content-Type": "application/json",
@@ -153,7 +158,10 @@ class PDeliveryModal extends React.Component {
                     return res.text();
                 })
                 .then((data) => {
-                    fetch(`/pickup/resolved_date/${sendingData.deliveryDate_}`)
+                    fetch(
+                        process.env.REACT_APP_BASE_URL +
+                            `/pickup/resolved_date/${sendingData.deliveryDate_}`
+                    )
                         .then((res) => res.text())
                         .then((time) => {
                             toast.success("Delivery successfuly edited", {
@@ -171,7 +179,7 @@ class PDeliveryModal extends React.Component {
                     return Promise.reject();
                 });
         } else {
-            fetch("/delivery/new", {
+            fetch(process.env.REACT_APP_BASE_URL + "/delivery/new", {
                 headers: {
                     Authorization: this.props.token,
                     "Content-Type": "application/json",
@@ -186,7 +194,10 @@ class PDeliveryModal extends React.Component {
                     return res.json();
                 })
                 .then((data) => {
-                    fetch(`/pickup/resolved_date/${sendingData.deliveryDate_}`)
+                    fetch(
+                        process.env.REACT_APP_BASE_URL +
+                            `/pickup/resolved_date/${sendingData.deliveryDate_}`
+                    )
                         .then((res) => res.text())
                         .then((time) => {
                             toast.success("Delivery successfuly added", {
