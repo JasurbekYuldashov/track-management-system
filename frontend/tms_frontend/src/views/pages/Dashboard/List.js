@@ -373,33 +373,35 @@ class Trips extends React.Component {
                     if (this.state.active !== tab) return;
                     let dataToShow = [];
                     data.data.forEach((el, i) => {
-                        let elToShow = {
-                            index: i + 1 + this.state.page * 10,
-                            unitNumber: el.number,
-                            driverOneId: el.driverOneId,
-                            driverTwoId: el.driverTwoId,
-                            driverOne: el.driverOne,
-                            driverOnePhoneNumber: el.driverOnePhoneNumber,
-                            driverTwo: el.driverTwo,
-                            driverTwoPhoneNumber: el.driverTwoPhoneNumber,
-                            typeOfUnit: el.typeOfUnit,
-                            typeOfDriver: el.typeOfDriver,
-                            unitStatus: el.unitStatus,
-                            unitStatusColor: el.unitStatusColor,
-                            teamColor: el.teamColor,
-                            driverStatus: el.driverStatus,
-                            driverStatusColor: el.driverStatusColor,
-                            from: el.from,
-                            to: el.to,
-                            loadNumber: el.loadNumber,
-                            notes: el.notes,
-                            endTime: el.endTime,
-                            loadId: el.loadId,
-                            truckId: el.truckId,
-                            unitStatusId: el.unitStatusId,
-                            calc: el.calc,
-                        };
-                        dataToShow.push(elToShow);
+                        if (el.unitStatus !== "OFF") {
+                            let elToShow = {
+                                index: i + 1 + this.state.page * 10,
+                                unitNumber: el.number,
+                                driverOneId: el.driverOneId,
+                                driverTwoId: el.driverTwoId,
+                                driverOne: el.driverOne,
+                                driverOnePhoneNumber: el.driverOnePhoneNumber,
+                                driverTwo: el.driverTwo,
+                                driverTwoPhoneNumber: el.driverTwoPhoneNumber,
+                                typeOfUnit: el.typeOfUnit,
+                                typeOfDriver: el.typeOfDriver,
+                                unitStatus: el.unitStatus,
+                                unitStatusColor: el.unitStatusColor,
+                                teamColor: el.teamColor,
+                                driverStatus: el.driverStatus,
+                                driverStatusColor: el.driverStatusColor,
+                                from: el.from,
+                                to: el.to,
+                                loadNumber: el.loadNumber,
+                                notes: el.notes,
+                                endTime: el.endTime,
+                                loadId: el.loadId,
+                                truckId: el.truckId,
+                                unitStatusId: el.unitStatusId,
+                                calc: el.calc,
+                            };
+                            dataToShow.push(elToShow);
+                        }
                     });
                     this.setState({
                         data: dataToShow,
@@ -439,33 +441,35 @@ class Trips extends React.Component {
                 if (this.state.active !== tab) return;
                 let dataToShow = [];
                 data.data.forEach((el, i) => {
-                    let elToShow = {
-                        index: i + 1,
-                        unitNumber: el.number,
-                        driverOneId: el.driverOneId,
-                        driverTwoId: el.driverTwoId,
-                        driverOne: el.driverOne,
-                        driverOnePhoneNumber: el.driverOnePhoneNumber,
-                        driverTwo: el.driverTwo,
-                        driverTwoPhoneNumber: el.driverTwoPhoneNumber,
-                        typeOfUnit: el.typeOfUnit,
-                        typeOfDriver: el.typeOfDriver,
-                        unitStatus: el.unitStatus,
-                        unitStatusColor: el.unitStatusColor,
-                        teamColor: el.teamColor,
-                        driverStatus: el.driverStatus,
-                        driverStatusColor: el.driverStatusColor,
-                        from: el.from,
-                        to: el.to,
-                        loadNumber: el.loadNumber,
-                        notes: el.notes,
-                        endTime: el.endTime,
-                        loadId: el.loadId,
-                        truckId: el.truckId,
-                        unitStatusId: el.unitStatusId,
-                        calc: el.calc,
-                    };
-                    dataToShow.push(elToShow);
+                    if (el.unitStatus !== "OFF") {
+                        let elToShow = {
+                            index: i + 1,
+                            unitNumber: el.number,
+                            driverOneId: el.driverOneId,
+                            driverTwoId: el.driverTwoId,
+                            driverOne: el.driverOne,
+                            driverOnePhoneNumber: el.driverOnePhoneNumber,
+                            driverTwo: el.driverTwo,
+                            driverTwoPhoneNumber: el.driverTwoPhoneNumber,
+                            typeOfUnit: el.typeOfUnit,
+                            typeOfDriver: el.typeOfDriver,
+                            unitStatus: el.unitStatus,
+                            unitStatusColor: el.unitStatusColor,
+                            teamColor: el.teamColor,
+                            driverStatus: el.driverStatus,
+                            driverStatusColor: el.driverStatusColor,
+                            from: el.from,
+                            to: el.to,
+                            loadNumber: el.loadNumber,
+                            notes: el.notes,
+                            endTime: el.endTime,
+                            loadId: el.loadId,
+                            truckId: el.truckId,
+                            unitStatusId: el.unitStatusId,
+                            calc: el.calc,
+                        };
+                        dataToShow.push(elToShow);
+                    }
                 });
                 this.setState({
                     data: dataToShow,
