@@ -14,11 +14,11 @@ import {
     // Button
 } from "reactstrap";
 import * as Icon from "react-feather";
-import {connect} from "react-redux";
-import {toast, Flip} from "react-toastify";
+import { connect } from "react-redux";
+import { toast, Flip } from "react-toastify";
 import Flatpickr from "react-flatpickr";
-import {Spin} from "antd";
-import {LoadingOutlined} from "@ant-design/icons";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 class EditDriver extends React.Component {
     state = {
@@ -34,19 +34,25 @@ class EditDriver extends React.Component {
         loading: true,
     };
     setStatus = (id) => {
-        fetch(`/driver/edit-status/${this.props.match.params.id}/${id}`, {
-            headers: {
-                Authorization: this.props.token,
-            },
-            method: "PUT",
-        }).then((res) => {
+        fetch(
+            process.env.REACT_APP_BASE_URL +
+                `/driver/edit-status/${this.props.match.params.id}/${id}`,
+            {
+                headers: {
+                    Authorization: this.props.token,
+                },
+                method: "PUT",
+            }
+        ).then((res) => {
             if (res.ok) {
-                toast.success("Status successfuly changed", {transition: Flip});
+                toast.success("Status successfuly changed", {
+                    transition: Flip,
+                });
                 this.setState({
                     status: id,
                 });
             } else {
-                toast.error("Something went wrong", {transition: Flip});
+                toast.error("Something went wrong", { transition: Flip });
                 res.text();
             }
         });
@@ -55,7 +61,7 @@ class EditDriver extends React.Component {
         let formData = new FormData();
         formData.append("file", file, file.name);
 
-        fetch("/file/upload", {
+        fetch(process.env.REACT_APP_BASE_URL + "/file/upload", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -81,12 +87,14 @@ class EditDriver extends React.Component {
             firstName: document.querySelector("#firstName").value,
             hireDate: document.querySelector("#hireDate").value,
             lastName: document.querySelector("#lastName").value,
-            licenseExpiration: document.querySelector("#licenseExpiration").value,
+            licenseExpiration:
+                document.querySelector("#licenseExpiration").value,
             licenseIssuedJurisdictionId: document.querySelector(
                 "#licenseIssuingState"
             ).value,
             licenseNumber: document.querySelector("#licenseNumber").value,
-            medicalCardRenewal: document.querySelector("#medicalCardRenewal").value,
+            medicalCardRenewal: document.querySelector("#medicalCardRenewal")
+                .value,
             phone: document.querySelector("#phone").value,
             stateProvinceId: parseInt(document.querySelector("#state").value),
             street: document.querySelector("#street").value,
@@ -99,7 +107,7 @@ class EditDriver extends React.Component {
             truckId: parseInt(document.querySelector("#truck").value),
             driverStatusId: parseInt(document.querySelector("#status").value),
         };
-        fetch("/driver/edit", {
+        fetch(process.env.REACT_APP_BASE_URL + "/driver/edit", {
             headers: {
                 Authorization: this.props.token,
                 "Content-Type": "application/json",
@@ -108,10 +116,12 @@ class EditDriver extends React.Component {
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.ok) {
-                toast.success("Driver successfuly edited", {transition: Flip});
+                toast.success("Driver successfuly edited", {
+                    transition: Flip,
+                });
                 window.history.back();
             } else {
-                toast.error("Something went wrong", {transition: Flip});
+                toast.error("Something went wrong", { transition: Flip });
                 res.text();
             }
         });
@@ -120,7 +130,7 @@ class EditDriver extends React.Component {
         let formData = new FormData();
         formData.append("file", file, file.name);
 
-        fetch("/file/upload", {
+        fetch(process.env.REACT_APP_BASE_URL + "/file/upload", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -138,7 +148,7 @@ class EditDriver extends React.Component {
         let formData = new FormData();
         formData.append("file", file, file.name);
 
-        fetch("/file/upload", {
+        fetch(process.env.REACT_APP_BASE_URL + "/file/upload", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -154,7 +164,7 @@ class EditDriver extends React.Component {
     };
 
     componentDidMount() {
-        fetch("/state_province/all", {
+        fetch(process.env.REACT_APP_BASE_URL + "/state_province/all", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -165,7 +175,7 @@ class EditDriver extends React.Component {
                     states: data,
                 })
             );
-        fetch("/driver/context", {
+        fetch(process.env.REACT_APP_BASE_URL + "/driver/context", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -176,71 +186,101 @@ class EditDriver extends React.Component {
                     paymentTypes: data.payment_types,
                     driverStatuses: data.driver_statuses,
                 });
-                fetch("/unit/list?size=10000", {
-                    headers: {
-                        Authorization: this.props.token,
-                    },
-                })
+                fetch(
+                    process.env.REACT_APP_BASE_URL + "/unit/list?size=10000",
+                    {
+                        headers: {
+                            Authorization: this.props.token,
+                        },
+                    }
+                )
                     .then((res) => res.json())
                     .then((data) => {
-                        this.setState({trucks: data.content});
-                        fetch(`/driver/${this.props.match.params.id}`, {
-                            headers: {
-                                Authorization: this.props.token,
-                            },
-                        })
+                        this.setState({ trucks: data.content });
+                        fetch(
+                            process.env.REACT_APP_BASE_URL +
+                                `/driver/${this.props.match.params.id}`,
+                            {
+                                headers: {
+                                    Authorization: this.props.token,
+                                },
+                            }
+                        )
                             .then((res) => res.json())
                             .then((data) => {
                                 this.setState({
                                     licenseFileId: data.licenseFileId,
                                     medicalCardFileId: data.medicalCardFileId,
                                     status: data.driverStatusId,
-                                    socialSecurityFileId: data.socialSecurityFileId,
+                                    socialSecurityFileId:
+                                        data.socialSecurityFileId,
                                     loading: false,
                                 });
-                                document.querySelector("#alternatePhone").value =
-                                    data.alternatePhone;
-                                document.querySelector("#city").value = data.city;
-                                document.querySelector("#defaultPaymentType").value =
-                                    data.defaultPaymentTypeId;
-                                document.querySelector("#email").value = data.email;
-                                document.querySelector("#firstName").value = data.firstName;
-                                document.querySelector("#hireDate").value = data.hireDate;
-                                document.querySelector("#lastName").value = data.lastName;
-                                document.querySelector("#licenseExpiration").value =
-                                    data.licenseExpirationFormatted;
-                                document.querySelector("#licenseIssuingState").value =
-                                    data.licenseIssuedJurisdictionId;
+                                document.querySelector(
+                                    "#alternatePhone"
+                                ).value = data.alternatePhone;
+                                document.querySelector("#city").value =
+                                    data.city;
+                                document.querySelector(
+                                    "#defaultPaymentType"
+                                ).value = data.defaultPaymentTypeId;
+                                document.querySelector("#email").value =
+                                    data.email;
+                                document.querySelector("#firstName").value =
+                                    data.firstName;
+                                document.querySelector("#hireDate").value =
+                                    data.hireDate;
+                                document.querySelector("#lastName").value =
+                                    data.lastName;
+                                document.querySelector(
+                                    "#licenseExpiration"
+                                ).value = data.licenseExpirationFormatted;
+                                document.querySelector(
+                                    "#licenseIssuingState"
+                                ).value = data.licenseIssuedJurisdictionId;
                                 document.querySelector("#licenseNumber").value =
                                     data.licenseNumber;
-                                document.querySelector("#medicalCardRenewal").value =
-                                    data.medicalCardRenewalFormatted;
-                                document.querySelector("#phone").value = data.phone;
-                                document.querySelector("#state").value = data.stateProvinceId;
-                                document.querySelector("#street").value = data.street;
-                                document.querySelector("#terminationDate").value =
-                                    data.terminationDateFormatted;
-                                document.querySelector("#zipCode").value = data.zipCode;
-                                this.setState({licenseFileId: data.licenseFileId});
-                                this.setState({medicalCardFileId: data.medicalCardFileId});
-                                document.querySelector("#note").value = data.note;
-                                document.querySelector("#status").value = data.driverStatusId;
-                                document.querySelector("#truck").value = data.truckId;
+                                document.querySelector(
+                                    "#medicalCardRenewal"
+                                ).value = data.medicalCardRenewalFormatted;
+                                document.querySelector("#phone").value =
+                                    data.phone;
+                                document.querySelector("#state").value =
+                                    data.stateProvinceId;
+                                document.querySelector("#street").value =
+                                    data.street;
+                                document.querySelector(
+                                    "#terminationDate"
+                                ).value = data.terminationDateFormatted;
+                                document.querySelector("#zipCode").value =
+                                    data.zipCode;
+                                this.setState({
+                                    licenseFileId: data.licenseFileId,
+                                });
+                                this.setState({
+                                    medicalCardFileId: data.medicalCardFileId,
+                                });
+                                document.querySelector("#note").value =
+                                    data.note;
+                                document.querySelector("#status").value =
+                                    data.driverStatusId;
+                                document.querySelector("#truck").value =
+                                    data.truckId;
                             });
                     });
             });
     }
 
     deleteLicense = () => {
-        this.setState({licenseFileId: null});
+        this.setState({ licenseFileId: null });
     };
 
     deleteSSN = () => {
-        this.setState({socialSecurityFileId: null});
+        this.setState({ socialSecurityFileId: null });
     };
 
     deleteMedicalCard = () => {
-        this.setState({medicalCardFileId: null});
+        this.setState({ medicalCardFileId: null });
     };
 
     render() {
@@ -253,7 +293,12 @@ class EditDriver extends React.Component {
                     <CardBody>
                         {this.state.loading ? (
                             <Spin
-                                indicator={<LoadingOutlined style={{fontSize: 44}} spin/>}
+                                indicator={
+                                    <LoadingOutlined
+                                        style={{ fontSize: 44 }}
+                                        spin
+                                    />
+                                }
                                 style={{
                                     height: "calc(100vh - 20rem)",
                                     width: "100%",
@@ -266,98 +311,168 @@ class EditDriver extends React.Component {
                             <>
                                 {" "}
                                 <Form className="d-flex">
-                                    <div style={{width: "50%", marginRight: 20}}>
-                                        <FormGroup className="align-items-center" row>
+                                    <div
+                                        style={{
+                                            width: "50%",
+                                            marginRight: 20,
+                                        }}
+                                    >
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>First Name</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="firstName"/>
+                                                <Input
+                                                    type="text"
+                                                    id="firstName"
+                                                />
                                             </Col>
                                         </FormGroup>
 
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Last Name*</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="lastName"/>
+                                                <Input
+                                                    type="text"
+                                                    id="lastName"
+                                                />
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Status</span>
                                             </Col>
                                             <Col md="8">
-                                                <CustomInput type="select" name="select" id="status">
-                                                    {this.state.driverStatuses.map((item) => (
-                                                        <option key={item.id} value={item.id}>
-                                                            {item.name}
-                                                        </option>
-                                                    ))}
+                                                <CustomInput
+                                                    type="select"
+                                                    name="select"
+                                                    id="status"
+                                                >
+                                                    {this.state.driverStatuses.map(
+                                                        (item) => (
+                                                            <option
+                                                                key={item.id}
+                                                                value={item.id}
+                                                            >
+                                                                {item.name}
+                                                            </option>
+                                                        )
+                                                    )}
                                                 </CustomInput>
                                             </Col>
                                         </FormGroup>
 
-                                        <FormGroup className="align-items-center mt-3" row>
+                                        <FormGroup
+                                            className="align-items-center mt-3"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Truck</span>
                                             </Col>
                                             <Col md="8">
-                                                <CustomInput type="select" name="select" id="truck">
-                                                    {this.state.trucks.map((item) => (
-                                                        <option key={item.id} value={item.id}>
-                                                            {item.number}
-                                                        </option>
-                                                    ))}
+                                                <CustomInput
+                                                    type="select"
+                                                    name="select"
+                                                    id="truck"
+                                                >
+                                                    {this.state.trucks.map(
+                                                        (item) => (
+                                                            <option
+                                                                key={item.id}
+                                                                value={item.id}
+                                                            >
+                                                                {item.number}
+                                                            </option>
+                                                        )
+                                                    )}
                                                 </CustomInput>
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Street</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="street"/>
+                                                <Input
+                                                    type="text"
+                                                    id="street"
+                                                />
                                             </Col>
                                         </FormGroup>
 
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>City*</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="city"/>
+                                                <Input type="text" id="city" />
                                             </Col>
                                         </FormGroup>
 
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>State/Province*</span>
                                             </Col>
                                             <Col md="8">
-                                                <CustomInput type="select" name="select" id="state">
-                                                    {this.state.states.map((item) => (
-                                                        <option key={item.id} value={item.id}>
-                                                            {item.name}
-                                                        </option>
-                                                    ))}
+                                                <CustomInput
+                                                    type="select"
+                                                    name="select"
+                                                    id="state"
+                                                >
+                                                    {this.state.states.map(
+                                                        (item) => (
+                                                            <option
+                                                                key={item.id}
+                                                                value={item.id}
+                                                            >
+                                                                {item.name}
+                                                            </option>
+                                                        )
+                                                    )}
                                                 </CustomInput>
                                             </Col>
                                         </FormGroup>
 
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Email</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="email"/>
+                                                <Input type="text" id="email" />
                                             </Col>
                                         </FormGroup>
 
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
-                                                <span>Default Payment Type*</span>
+                                                <span>
+                                                    Default Payment Type*
+                                                </span>
                                             </Col>
                                             <Col md="8">
                                                 <CustomInput
@@ -365,24 +480,38 @@ class EditDriver extends React.Component {
                                                     name="select"
                                                     id="defaultPaymentType"
                                                 >
-                                                    {this.state.paymentTypes.map((item) => (
-                                                        <option key={item.id} value={item.id}>
-                                                            {item.name}
-                                                        </option>
-                                                    ))}
+                                                    {this.state.paymentTypes.map(
+                                                        (item) => (
+                                                            <option
+                                                                key={item.id}
+                                                                value={item.id}
+                                                            >
+                                                                {item.name}
+                                                            </option>
+                                                        )
+                                                    )}
                                                 </CustomInput>
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>License number</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="licenseNumber"/>
+                                                <Input
+                                                    type="text"
+                                                    id="licenseNumber"
+                                                />
                                             </Col>
                                         </FormGroup>
 
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>License Expiration</span>
                                             </Col>
@@ -403,34 +532,60 @@ class EditDriver extends React.Component {
                                             />
                                         </FormGroup>
                                     </div>
-                                    <div style={{width: "50%"}}>
-                                        <FormGroup className="align-items-center" row>
+                                    <div style={{ width: "50%" }}>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Zip Code</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="zipCode"/>
+                                                <Input
+                                                    type="text"
+                                                    id="zipCode"
+                                                />
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Phone</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="phone" placeholder=""/>
+                                                <Input
+                                                    type="text"
+                                                    id="phone"
+                                                    placeholder=""
+                                                />
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Alternate Phone</span>
                                             </Col>
                                             <Col md="8">
-                                                <Input type="text" id="alternatePhone" placeholder=""/>
+                                                <Input
+                                                    type="text"
+                                                    id="alternatePhone"
+                                                    placeholder=""
+                                                />
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
-                                                <span>License issuing state/jurisdiction</span>
+                                                <span>
+                                                    License issuing
+                                                    state/jurisdiction
+                                                </span>
                                             </Col>
                                             <Col md="8">
                                                 <CustomInput
@@ -438,17 +593,27 @@ class EditDriver extends React.Component {
                                                     name="select"
                                                     id="licenseIssuingState"
                                                 >
-                                                    {this.state.states.map((item) => (
-                                                        <option key={item.id} value={item.id}>
-                                                            {item.name}
-                                                        </option>
-                                                    ))}
+                                                    {this.state.states.map(
+                                                        (item) => (
+                                                            <option
+                                                                key={item.id}
+                                                                value={item.id}
+                                                            >
+                                                                {item.name}
+                                                            </option>
+                                                        )
+                                                    )}
                                                 </CustomInput>
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
-                                                <span>Medical Card Renewal</span>
+                                                <span>
+                                                    Medical Card Renewal
+                                                </span>
                                             </Col>
                                             <Col md="8">
                                                 <Flatpickr
@@ -457,15 +622,24 @@ class EditDriver extends React.Component {
                                                 />
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Hire Date</span>
                                             </Col>
                                             <Col md="8">
-                                                <Flatpickr id="hireDate" className="form-control"/>
+                                                <Flatpickr
+                                                    id="hireDate"
+                                                    className="form-control"
+                                                />
                                             </Col>
                                         </FormGroup>
-                                        <FormGroup className="align-items-center" row>
+                                        <FormGroup
+                                            className="align-items-center"
+                                            row
+                                        >
                                             <Col md="4">
                                                 <span>Termination Date</span>
                                             </Col>
@@ -480,7 +654,7 @@ class EditDriver extends React.Component {
                                             <>
                                                 <div className="d-flex align-items-center justify-content-end">
                                                     <Button.Ripple
-                                                        style={{width: 225}}
+                                                        style={{ width: 225 }}
                                                         className="mt-1"
                                                         type="button"
                                                         href={`${window.location.origin}/file/${this.state.licenseFileId}`}
@@ -497,19 +671,27 @@ class EditDriver extends React.Component {
                                                         className="btn-icon mt-1"
                                                         color="red"
                                                         type="button"
-                                                        onClick={() => this.deleteLicense()}
+                                                        onClick={() =>
+                                                            this.deleteLicense()
+                                                        }
                                                     >
-                                                        <Icon.Trash2/>
+                                                        <Icon.Trash2 />
                                                     </Button.Ripple>
                                                 </div>
                                             </>
                                         ) : (
                                             <FormGroup>
-                                                <Label for="customFile">Upload License</Label>
+                                                <Label for="customFile">
+                                                    Upload License
+                                                </Label>
                                                 <CustomInput
                                                     type="file"
                                                     id="licenseFile"
-                                                    onInput={(e) => this.uploadLicense(e.target.files[0])}
+                                                    onInput={(e) =>
+                                                        this.uploadLicense(
+                                                            e.target.files[0]
+                                                        )
+                                                    }
                                                 />
                                             </FormGroup>
                                         )}
@@ -517,7 +699,7 @@ class EditDriver extends React.Component {
                                             <>
                                                 <div className="d-flex align-items-center justify-content-end">
                                                     <Button.Ripple
-                                                        style={{width: 225}}
+                                                        style={{ width: 225 }}
                                                         className="mt-1"
                                                         type="button"
                                                         href={`${window.location.origin}/file/${this.state.medicalCardFileId}`}
@@ -534,20 +716,26 @@ class EditDriver extends React.Component {
                                                         className="btn-icon mt-1"
                                                         color="red"
                                                         type="button"
-                                                        onClick={() => this.deleteMedicalCard()}
+                                                        onClick={() =>
+                                                            this.deleteMedicalCard()
+                                                        }
                                                     >
-                                                        <Icon.Trash2/>
+                                                        <Icon.Trash2 />
                                                     </Button.Ripple>
                                                 </div>
                                             </>
                                         ) : (
                                             <FormGroup>
-                                                <Label for="customFile">Medical Cart</Label>
+                                                <Label for="customFile">
+                                                    Medical Cart
+                                                </Label>
                                                 <CustomInput
                                                     type="file"
                                                     id="medicalCart"
                                                     onInput={(e) =>
-                                                        this.uploadMedicalCart(e.target.files[0])
+                                                        this.uploadMedicalCart(
+                                                            e.target.files[0]
+                                                        )
                                                     }
                                                 />
                                             </FormGroup>
@@ -556,7 +744,7 @@ class EditDriver extends React.Component {
                                             <>
                                                 <div className="d-flex align-items-center justify-content-end">
                                                     <Button.Ripple
-                                                        style={{width: 225}}
+                                                        style={{ width: 225 }}
                                                         className="mt-1"
                                                         type="button"
                                                         href={`${window.location.origin}/file/${this.state.socialSecurityFileId}`}
@@ -573,19 +761,27 @@ class EditDriver extends React.Component {
                                                         className="btn-icon mt-1"
                                                         color="red"
                                                         type="button"
-                                                        onClick={() => this.deleteSSN()}
+                                                        onClick={() =>
+                                                            this.deleteSSN()
+                                                        }
                                                     >
-                                                        <Icon.Trash2/>
+                                                        <Icon.Trash2 />
                                                     </Button.Ripple>
                                                 </div>
                                             </>
                                         ) : (
                                             <FormGroup>
-                                                <Label for="customFile">SSN</Label>
+                                                <Label for="customFile">
+                                                    SSN
+                                                </Label>
                                                 <CustomInput
                                                     type="file"
                                                     id="ssn"
-                                                    onInput={(e) => this.uploadSSN(e.target.files[0])}
+                                                    onInput={(e) =>
+                                                        this.uploadSSN(
+                                                            e.target.files[0]
+                                                        )
+                                                    }
                                                 />
                                             </FormGroup>
                                         )}
@@ -597,13 +793,13 @@ class EditDriver extends React.Component {
                                     type="button"
                                     onClick={() => this.editDriver()}
                                 >
-                                    <Icon.Check size={22}/> Save
+                                    <Icon.Check size={22} /> Save
                                 </Button>
                             </>
                         )}
                     </CardBody>
                 </Card>
-                <Card style={{width: "30%", minWidth: 400}}>
+                <Card style={{ width: "30%", minWidth: 400 }}>
                     <CardBody>
                         <FormGroup className="align-items-center" row>
                             <Col md="4">
@@ -613,7 +809,9 @@ class EditDriver extends React.Component {
                                 <CustomInput
                                     type="select"
                                     name="select"
-                                    onChange={(e) => this.setStatus(e.target.value)}
+                                    onChange={(e) =>
+                                        this.setStatus(e.target.value)
+                                    }
                                     value={this.state.status}
                                 >
                                     {this.state.driverStatuses.map((item) => (

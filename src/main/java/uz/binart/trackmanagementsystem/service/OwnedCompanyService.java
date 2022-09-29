@@ -1,5 +1,7 @@
 package uz.binart.trackmanagementsystem.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import uz.binart.trackmanagementsystem.dto.OwnedCompanyListDto;
 import uz.binart.trackmanagementsystem.model.OwnedCompany;
 

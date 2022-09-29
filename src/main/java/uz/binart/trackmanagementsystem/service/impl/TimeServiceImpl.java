@@ -20,8 +20,11 @@ public class TimeServiceImpl implements TimeService {
     private final LocationService locationService;
 
     public Pair<Long, Long> getCorrectedByCentralTimeTimestamps(Date localStartTime, Date localEndTime, Company shipper, Company consignee){
-        Long correctedStartTime = resolveTime(localStartTime, shipper);
-        Long correctedEndTime = resolveTime(localEndTime, consignee);
+//        Long correctedStartTime = resolveTime(localStartTime, shipper);
+//        Long correctedEndTime = resolveTime(localEndTime, consignee);
+        Long correctedStartTime = localStartTime.getTime();
+        Long correctedEndTime = localEndTime.getTime();
+
         return Pair.of(correctedStartTime, correctedEndTime);
     }
 
@@ -36,7 +39,6 @@ public class TimeServiceImpl implements TimeService {
             if(location != null){
                 Location parentLocation = locationService.findByAnsiFromCache(location.getParentAnsi());
                 if(parentLocation != null){
-
                     if(location.getParentTimeZone().equals(1))
                         timeZone = parentLocation.getFirstTimeZone();
                     else if(location.getParentTimeZone().equals(2))

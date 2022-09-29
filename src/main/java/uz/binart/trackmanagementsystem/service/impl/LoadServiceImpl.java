@@ -235,6 +235,10 @@ public class LoadServiceImpl implements LoadService {
                 predicates.add(criteriaBuilder.or(allByCompanyPredicates.toArray(new Predicate[0])));
             }
 
+//            System.out.println("Times");
+//            System.out.println(startTime);
+//            System.out.println(endTime);
+
             Predicate startTimePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get("centralStartTime"), startTime), criteriaBuilder.lessThanOrEqualTo(root.get("centralStartTime"), endTime));
             Predicate endTimePredicate = criteriaBuilder.and(criteriaBuilder.greaterThanOrEqualTo(root.get("centralEndTime"), startTime), criteriaBuilder.lessThanOrEqualTo(root.get("centralEndTime"), endTime));
 
@@ -243,7 +247,7 @@ public class LoadServiceImpl implements LoadService {
             else
                 predicates.add(endTimePredicate);
 
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("centralEndTime"), startTime));
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("centralStartTime"), startTime));
 
             predicates.add(criteriaBuilder.equal(root.get("deleted"), false));
 
@@ -329,7 +333,6 @@ public class LoadServiceImpl implements LoadService {
 
         validateLoad(load, true);
 
-
         if (loadRepository.existsByCustomLoadNumberAndIdNotAndDeletedFalse(load.getCustomLoadNumber(), load.getId()))
             throw new WrongEntityStructureException("another load's number violation");
 
@@ -346,11 +349,13 @@ public class LoadServiceImpl implements LoadService {
 
         load.setStartTime(pickupsMinTime);
         load.setEndTime(deliveriesMaxTime);
+        load.setCentralStartTime(pickupsMinTime);
+        load.setCentralEndTime(deliveriesMaxTime);
         load.setUpdatedAsUpcoming(false);
         load.setUpdatedAsCovered(false);
         load.setUpdatedAsHistory(false);
         setSortedStopsIds(load);
-        setCorrectedStartAndEndTime(load);
+//        setCorrectedStartAndEndTime(load);
         load.setBooked(oldLoad.getBooked());
         load.setDispute(oldLoad.getDispute());
         load.setDetention(oldLoad.getDetention());

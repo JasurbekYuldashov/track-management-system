@@ -101,7 +101,7 @@ class AppRouter extends React.Component {
         let session_id = Cookies.get("session_id");
         let token;
         if (session_id !== undefined) {
-            fetch("/session/get_by_session_id")
+            fetch(process.env.REACT_APP_BASE_URL + "/session/get_by_session_id")
                 .then((res) => {
                     token = res.headers.get("authorization");
                     return res.json();

@@ -5,14 +5,21 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.configurationprocessor.json.JSONException;
+import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.data.util.Pair;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import uz.binart.trackmanagementsystem.dto.AccountingDto;
 import uz.binart.trackmanagementsystem.model.*;
 import uz.binart.trackmanagementsystem.service.*;
 
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -29,6 +36,9 @@ public class AccountingServiceImpl implements AccountingService {
     private final UnitService unitService;
     private final TeamService teamService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     public List<Long> matchedIds(){
         return null;
     }
@@ -38,8 +48,13 @@ public class AccountingServiceImpl implements AccountingService {
         return null;
     }
 
-    public List<AccountingDto> getProperInfo(Long carrierId, Long truckId, Long driverId, Long teamId, Long allByCompanysTruck,  Long startTime, Long endTime, Boolean weekly, Boolean isDispatcher){
-        List<Long> segments = getSegments(startTime, endTime);
+    public List<AccountingDto> getProperInfo(Long carrierId, Long truckId, Long driverId, Long teamId, Long allByCompanysTruck, LocalDateTime dateTime, Boolean weekly, Boolean isDispatcher) throws JSONException {
+
+        Timestamp timestamp = Timestamp.valueOf(dateTime);
+
+        List<Long> segments = getSegments(dateTime);
+        Long startTime = segments.get(0);
+        Long endTime = timestamp.getTime();
         List<Load> loads = loadService.findAllForAccounting(carrierId, truckId, driverId, teamId, allByCompanysTruck, startTime, endTime, weekly);
 
         List<AccountingDto> accountingDtoList = new ArrayList<>();
@@ -103,7 +118,156 @@ public class AccountingServiceImpl implements AccountingService {
             float amount = load.getRcPrice() != null ? load.getRcPrice() : 0f, revised = load.getRevisedRcPrice() != null ? load.getRevisedRcPrice() : 0f;
             float factoring = load.getFactoring() != null ? load.getFactoring() : 0f;
             float tafs = load.getTafs() != null ? load.getTafs() : 0f;
+//            System.out.println(amount);
+            if(revised != 0f)
+                acc.setKo(revised - amount);
+            else
+                acc.setKo(0f);
 
+            if(!isDispatcher) {
+                acc.setFactoring(factoring);
+                acc.setTafs(tafs);
+                acc.setNetPaid(load.getNetPaid() != null ? load.getNetPaid() : 0f);
+            }else{
+                acc.setFactoring(0f);
+                acc.setTafs(0f);
+                acc.setNetPaid(0f);
+            }
+
+
+            try {
+                acc.setDateTime(acc.getEndTime().toString());
+            } catch (Exception e){}
+
+
+            //------------------------------setting segmented price-----------------------------------------
+
+            Long timeStart = load.getCentralStartTime() != null ? load.getCentralStartTime() : load.getStartTime();
+            Long timeEnd = load.getCentralEndTime() != null ? load.getCentralEndTime() : load.getEndTime();
+
+            Pair<Integer, Integer> startsBeforeAndEndsAfter = getStartBeforeAndEndsAfterIndexes(segments, timeStart, timeEnd);
+            Integer startsBefore = startsBeforeAndEndsAfter.getFirst();
+            Integer endsAfter = startsBeforeAndEndsAfter.getSecond();
+
+            if(endsAfter != -1){
+
+                long startsBeforePoint;
+
+                if(startsBefore != -1)
+                    startsBeforePoint = segments.get(startsBefore);
+                else startsBeforePoint = 0;
+
+                long endsAfterPoint = segments.get(endsAfter);
+
+                long start = timeStart;
+                long end = timeEnd;
+
+                Map<String, Long> periods = countEntireBeforeAndAfterInMinutes(startsBeforePoint, endsAfterPoint, start, end, startsBefore, endsAfter);
+                long entire = periods.get("entire");
+                long beforeStart = periods.get("beforeStart");
+                long afterEnd = periods.get("afterEnd");
+
+                double price = load.getRevisedRcPrice() != null ? load.getRevisedRcPrice() : load.getRcPrice();
+                double costOfAMinute = price / entire;
+
+                double[] sorted = sortByWeeks(segments.size(), startsBefore, endsAfter, costOfAMinute * beforeStart, costOfAMinute * afterEnd, entire * costOfAMinute);
+
+                acc.setSegmentedPrices(sorted);
+
+            }else{
+                double[] sorted = new double[segments.size()];
+                double price = load.getRevisedRcPrice() != null ? load.getRevisedRcPrice() : load.getRcPrice();
+                DecimalFormat df = new DecimalFormat("#.##");
+                try {
+                    sorted[0] = Double.parseDouble(df.format(price));
+                }catch(NumberFormatException exception){
+                    try {
+                        DecimalFormat df2 = new DecimalFormat("#,##");
+                        sorted[0] = Double.parseDouble(df2.format(price));
+                    }catch(NumberFormatException exception2){
+                        DecimalFormat df3 = new DecimalFormat("# ##");
+                        sorted[0] = Double.parseDouble(df3.format(price));
+                    }
+                }
+                acc.setSegmentedPrices(sorted);
+            }
+
+            //----------------------------------------------------------------------------------------------
+            accountingDtoList.add(acc);
+        }
+//sout
+        return accountingDtoList;
+    }
+
+    public List<AccountingDto> getProperInfoReport(Long carrierId, Long truckId, Long driverId, Long teamId, Long allByCompanysTruck, Long startTime, Long endTime, Boolean weekly, Boolean isDispatcher) throws JSONException {
+
+        List<Long> segments = getSegmentsReport(startTime, endTime);
+
+        List<Load> loads = loadService.findAllForAccounting(carrierId, truckId, driverId, teamId, allByCompanysTruck, startTime, endTime, weekly);
+
+        List<AccountingDto> accountingDtoList = new ArrayList<>();
+        for(int i = 0; i < loads.size(); i++){
+            AccountingDto acc = new AccountingDto();
+            acc.setSerialNumber(i + 1);
+            Load load = loads.get(i);
+
+            Optional<Trip> tripOptional = tripService.getById(load.getTripId());
+
+            if(tripOptional.isPresent()){
+                Trip trip = tripOptional.get();
+                Unit unit = getTruck(trip);
+                if(unit != null) {
+                    acc.setTruckNumber(unit.getNumber());
+                    if (unit.getEmployerId() != null)
+                        acc.setTruckCompany(ownedCompanyService.getFromCache(unit.getEmployerId()).getName());
+                    if (unit.getTeamId() != null) {
+                        acc.setTeam(teamService.getById(unit.getTeamId()).getName());
+                    }
+                }
+                acc.setCarrierName(getCarrierName(trip));
+            }
+
+            acc.setRc(load.getCustomLoadNumber());
+
+            Company company = companyService.getById(load.getCustomerId());
+
+            if(company != null)
+                acc.setCompany(company.getCompanyName());
+
+            Company shipperCompany = getShipperOrConsigneeCompany(load, true);
+            if(shipperCompany != null) {
+                Map<String, String> shipperNameAndLocation = getShipperCompanyNameAndLocationWithZip(shipperCompany);
+                acc.setShipperCompanyName(shipperNameAndLocation.get("company_name"));
+                if(!shipperNameAndLocation.get("zip").equals(""))
+                    acc.setShipperCompanyLocation(shipperNameAndLocation.get("company_location") + " " + shipperNameAndLocation.get("zip"));
+                else
+                    acc.setShipperCompanyLocation(shipperNameAndLocation.get("company_location"));
+            }
+
+            acc.setTimeStart(load.getCentralStartTime() != null ? load.getCentralStartTime() : load.getStartTime());
+            acc.setEndTime(load.getCentralEndTime() != null ? load.getCentralEndTime() : load.getEndTime());
+
+            Company consigneeCompany = getShipperOrConsigneeCompany(load, false);
+            if(consigneeCompany != null) {
+                Map<String, String> consigneeCompanyNameAndLocation = getShipperCompanyNameAndLocationWithZip(consigneeCompany);
+                acc.setEndLocation(consigneeCompanyNameAndLocation.get("company_location"));
+                if(!consigneeCompanyNameAndLocation.get("zip").equals(""))
+                    acc.setEndLocation(consigneeCompanyNameAndLocation.get("company_location") + " " + consigneeCompanyNameAndLocation.get("zip"));
+                else
+                    acc.setEndLocation(consigneeCompanyNameAndLocation.get("company_location"));
+            }
+
+            acc.setFine(load.getFine() != null ? load.getFine() : 0f);
+            acc.setBooked(load.getBooked() != null ? load.getBooked() : 0f);
+            acc.setDispute(load.getDispute() != null ? load.getDispute() : 0f);
+            acc.setDetention(load.getDetention() != null ? load.getDetention() : 0f);
+            acc.setAdditional(load.getAdditional() != null ? load.getAdditional() : 0f);
+            acc.setRevisedInvoice(load.getRevisedInvoice() != null ? load.getRevisedInvoice() : 0f);
+
+            float amount = load.getRcPrice() != null ? load.getRcPrice() : 0f, revised = load.getRevisedRcPrice() != null ? load.getRevisedRcPrice() : 0f;
+            float factoring = load.getFactoring() != null ? load.getFactoring() : 0f;
+            float tafs = load.getTafs() != null ? load.getTafs() : 0f;
+//            System.out.println(amount);
             if(revised != 0f)
                 acc.setKo(revised - amount);
             else
@@ -203,17 +367,68 @@ public class AccountingServiceImpl implements AccountingService {
         return map;
     }
 
-    private List<Long> getSegments(Long timeStart, Long timeEnd){
-
+    private List<Long> getSegments(LocalDateTime dateTime) throws JSONException {
         List<Long> segments = new ArrayList<>();
+
+        String weekDay = "";
+        do{
+            if(dateTime.getDayOfWeek().toString() == "SATURDAY"){
+                weekDay = dateTime.getDayOfWeek().toString();
+                dateTime = dateTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                Timestamp timest = Timestamp.valueOf(dateTime);
+                segments.add(timest.getTime());
+
+            }
+            else{
+                if(dateTime.minusDays(1).getDayOfWeek().toString() == "SATURDAY"){
+                    weekDay = dateTime.minusDays(1).getDayOfWeek().toString();
+                    dateTime = dateTime.withHour(0).withMinute(0).withSecond(0).withNano(0);
+                    Timestamp timest = Timestamp.valueOf(dateTime);
+                    segments.add(timest.getTime());
+                }
+                dateTime = dateTime.minusDays(1);
+            }
+        }while(weekDay != "SATURDAY");
+//        System.out.println(weekDay);
+//        System.out.println(dateTime);
+//
+//        System.out.println("Segment");
+//        System.out.println(segments);
+//
+//        List<Long> segments = new ArrayList<>();
+//        Calendar calendar = Calendar.getInstance();
+//        calendar.setTimeInMillis(timeStart);
+//
+//        if(calendar.get(Calendar.DAY_OF_WEEK) >= 6)
+//            calendar.add(Calendar.WEEK_OF_MONTH, 1);
+//
+//        calendar.set(Calendar.DAY_OF_WEEK, 6);
+//        calendar.set(Calendar.HOUR, 11);
+//        calendar.set(Calendar.MINUTE, 59);
+//        calendar.set(Calendar.SECOND, 59);
+//        calendar.set(Calendar.MILLISECOND, 999);
+//
+//        do{
+//            segments.add(calendar.getTimeInMillis());
+//            calendar.add(Calendar.DAY_OF_WEEK, 7);
+//        }while(calendar.getTimeInMillis() <= timeEnd);
+//        System.out.println("Segment");
+//        System.out.println(segments);
+        return segments;
+    }
+
+
+    private List<Long> getSegmentsReport(Long startTime, Long endTime) throws JSONException {
+        List<Long> segments = new ArrayList<>();
+
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timeStart);
+        calendar.setTimeInMillis(startTime);
 
         if(calendar.get(Calendar.DAY_OF_WEEK) >= 6)
             calendar.add(Calendar.WEEK_OF_MONTH, 1);
 
         calendar.set(Calendar.DAY_OF_WEEK, 6);
-        calendar.set(Calendar.HOUR, 23);
+        calendar.set(Calendar.HOUR, 11);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         calendar.set(Calendar.MILLISECOND, 999);
@@ -221,8 +436,9 @@ public class AccountingServiceImpl implements AccountingService {
         do{
             segments.add(calendar.getTimeInMillis());
             calendar.add(Calendar.DAY_OF_WEEK, 7);
-        }while(calendar.getTimeInMillis() <= timeEnd);
-
+        }while(calendar.getTimeInMillis() <= endTime);
+        System.out.println("Segment");
+        System.out.println(segments);
         return segments;
     }
 

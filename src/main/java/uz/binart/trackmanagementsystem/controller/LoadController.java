@@ -99,7 +99,9 @@ public class LoadController {
     }
 
     @GetMapping("/list")
-    public ResponseEntity<Map<String, Object>> getList(@RequestParam(name = "tripId", required = false)Long tripId, @RequestParam(name = "number", defaultValue = "")String number, Pageable pageable){
+    public ResponseEntity<Map<String, Object>> getList(@RequestParam(name = "tripId", required = false) Long tripId,
+                                                       @RequestParam(name = "number", defaultValue = "") String number,
+                                                       Pageable pageable){
 
         List<Long> visibleIds = utilService.getVisibleIds(userService.getCurrentUserFromContext());
 
@@ -154,7 +156,6 @@ public class LoadController {
                     loadDto.setTruckNumber(trip.getTruckId().toString());
                     if(load.getDriverId() != null) {
                         Driver driver = driverService.findById(load.getDriverId());
-
                         nameString = driverService.resolveName(driver);
                     }
                 }

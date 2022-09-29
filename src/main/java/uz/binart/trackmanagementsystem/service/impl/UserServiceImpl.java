@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     }
 
     public User getCurrentUserFromContext(){
-        return  userRepository.findByUsernameAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
+        return userRepository.findByUsernameAndDeletedFalse(SecurityContextHolder.getContext().getAuthentication().getName());
     }
 
     public Page<User> findFiltered(Long id, String username, Integer roleId, String phone, Pageable pageable){

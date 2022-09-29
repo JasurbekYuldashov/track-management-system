@@ -41,13 +41,17 @@ public class FleetController {
     private final ExpirationNotificationService expirationNotificationService;
 
     @GetMapping("/list")
-    public ResponseEntity<?> getFleetList(UnitDto unitDto, @PageableDefault(page = 0, size = 20000, sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable){
+    public ResponseEntity<?> getFleetList(UnitDto unitDto,
+                                          @PageableDefault(sort = {"id"}, direction = Sort.Direction.DESC) Pageable pageable){
 
         Page<Unit> unitPage = unitService.findFiltered(unitDto, pageable);
 
         Map<String, Object> map = new HashMap<>();
 
         map.put("data", convertToFleetDtoS(unitPage.getContent()));
+        map.put("page", unitPage.getNumber());
+        map.put("total_pages", unitPage.getTotalPages());
+        map.put("total_elements", unitPage.getTotalElements());
 
         return ResponseEntity.ok(map);
     }

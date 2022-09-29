@@ -15,6 +15,8 @@ import * as Icon from "react-feather";
 import Flatpickr from "react-flatpickr";
 import AsyncSelect from "react-select/async";
 import { toast, Flip } from "react-toastify";
+import moment from "moment";
+
 class PickupModal extends React.Component {
     state = {
         shipper: null,
@@ -32,14 +34,14 @@ class PickupModal extends React.Component {
             this.setState({
                 searchVal: val,
             });
-            fetch(`/company/search?q=${val}`, {
+            fetch(process.env.REACT_APP_BASE_URL + `/company/search?q=${val}`, {
                 headers: {
                     Authorization: this.props.token,
                 },
             })
                 .then((res) => res.json())
                 .then((data) => {
-                    if (val == this.state.searchVal) {
+                    if (val === this.state.searchVal) {
                         let dataToShow = [];
                         data.forEach((el) => {
                             let elToShow = {
@@ -70,11 +72,15 @@ class PickupModal extends React.Component {
             this.props.modal &&
             this.props.editingChildId
         ) {
-            fetch(`/pickup/${this.props.editingChildId}`, {
-                headers: {
-                    Authorization: this.props.token,
-                },
-            })
+            fetch(
+                process.env.REACT_APP_BASE_URL +
+                    `/pickup/${this.props.editingChildId}`,
+                {
+                    headers: {
+                        Authorization: this.props.token,
+                    },
+                }
+            )
                 .then((res) => res.json())
                 .then((data) => {
                     let selectedValue = {
@@ -84,6 +90,7 @@ class PickupModal extends React.Component {
                     // let d = new Date();
                     // let utc = data.pickupDate_ + d.getTimezoneOffset() * 60000;
                     // let nd = utc + 3600000 * 5;
+                    console.log(data.pickupDate_);
                     this.setState({
                         shipperSelected: selectedValue,
                         pickupDate_: data.pickupDate_,
@@ -157,7 +164,7 @@ class PickupModal extends React.Component {
             this.props.editingChildId !== undefined
         ) {
             sendingData.id = this.props.editingChildId;
-            fetch("/pickup/edit", {
+            fetch(process.env.REACT_APP_BASE_URL + "/pickup/edit", {
                 headers: {
                     Authorization: this.props.token,
                     "Content-Type": "application/json",
@@ -172,7 +179,10 @@ class PickupModal extends React.Component {
                     return res.text();
                 })
                 .then((data) => {
-                    fetch(`/pickup/resolved_date/${sendingData.pickupDate_}`)
+                    fetch(
+                        process.env.REACT_APP_BASE_URL +
+                            `/pickup/resolved_date/${sendingData.pickupDate_}`
+                    )
                         .then((res) => res.text())
                         .then((time) => {
                             toast.success("Pickup successfuly edited", {
@@ -190,7 +200,7 @@ class PickupModal extends React.Component {
                     return Promise.reject();
                 });
         } else {
-            fetch("/pickup/new", {
+            fetch(process.env.REACT_APP_BASE_URL + "/pickup/new", {
                 headers: {
                     Authorization: this.props.token,
                     "Content-Type": "application/json",
@@ -205,7 +215,10 @@ class PickupModal extends React.Component {
                     return res.json();
                 })
                 .then((data) => {
-                    fetch(`/pickup/resolved_date/${sendingData.pickupDate_}`)
+                    fetch(
+                        process.env.REACT_APP_BASE_URL +
+                            `/pickup/resolved_date/${sendingData.pickupDate_}`
+                    )
                         .then((res) => res.text())
                         .then((time) => {
                             toast.success("Pickup successfuly added", {
@@ -229,10 +242,10 @@ class PickupModal extends React.Component {
     uploadBol = (file, item) => {
         let formData = new FormData();
         formData.append("file", file);
-        if (file == undefined) {
+        if (file === undefined) {
             return;
         }
-        fetch("/file/upload", {
+        fetch(process.env.REACT_APP_BASE_URL + "/file/upload", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -259,6 +272,15 @@ class PickupModal extends React.Component {
             });
         }
     };
+
+    parseDate(dateString, format) {
+        let timeZone = "America/Los_Angeles";
+        let timezonedDate = timeZone
+            ? new moment.tz(dateString, format, timeZone)
+            : new moment(dateString, format);
+        return timezonedDate.toDate();
+    }
+
     render() {
         return (
             <Modal
@@ -327,6 +349,7 @@ class PickupModal extends React.Component {
                                         altInput: true,
                                         altFormat: "m-d-Y H:i",
                                         clickOpens: this.props.canBeChanged,
+                                        parseDate: this.parseDate,
                                     }}
                                     onChange={(e) => {
                                         let utc =

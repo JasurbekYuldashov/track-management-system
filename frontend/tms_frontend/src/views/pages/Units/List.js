@@ -1,14 +1,14 @@
 import React from "react";
-import {Card, CardBody, Input} from "reactstrap";
-import {AgGridReact} from "ag-grid-react";
-import {Button} from "reactstrap";
+import { Card, CardBody, Input } from "reactstrap";
+import { AgGridReact } from "ag-grid-react";
+import { Button } from "reactstrap";
 import "../../../assets/scss/plugins/tables/_agGridStyleOverride.scss";
 import * as Icon from "react-feather";
-import {connect} from "react-redux";
-import {Link} from "react-router-dom";
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import SweetAlert from "react-bootstrap-sweetalert";
-import {Spin} from "antd";
-import {LoadingOutlined} from "@ant-design/icons";
+import { Pagination, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 
 class Drivers extends React.Component {
     state = {
@@ -35,7 +35,6 @@ class Drivers extends React.Component {
                 headerName: "#",
                 field: "index",
                 maxWidth: 50,
-                flex: 1,
                 filter: false,
                 cellStyle: function (params) {
                     return {
@@ -47,31 +46,26 @@ class Drivers extends React.Component {
                 headerName: "Unit Number",
                 field: "number",
                 maxWidth: 120,
-                flex: 2,
             },
             {
                 headerName: "VIN",
                 field: "vin",
                 maxWidth: 170,
-                flex: 2,
             },
             {
                 headerName: "Type",
                 field: "type",
                 maxWidth: 100,
-                flex: 1,
             },
             {
                 headerName: "State",
                 field: "state",
                 minWidth: 150,
-                flex: 1,
             },
             {
                 headerName: "Status",
                 field: "status",
-                maxWidth: 120,
-                flex: 1,
+                width: 120,
                 cellStyle: function (params) {
                     return {
                         fontSize: "13px",
@@ -89,7 +83,7 @@ class Drivers extends React.Component {
                 field: "ownership",
                 minWidth: 100,
                 cellStyle: function (params) {
-                    return {textAlign: "center"};
+                    return { textAlign: "center" };
                     // if (params.value == "TEAM" || params.value == "OWNER TEAM") {
                     //   return { color: "white", backgroundColor: "#606060" };
                     // } else {
@@ -101,18 +95,15 @@ class Drivers extends React.Component {
                 headerName: "License Expiration",
                 field: "licenseExpiration",
                 minWidth: 100,
-                flex: 1,
             },
 
             {
                 headerName: "Inspection Exp",
                 field: "inspectation",
                 minWidth: 100,
-                flex: 1,
             },
             {
                 maxWidth: 100,
-                flex: 1,
                 headerName: "",
                 field: "actions",
                 sortable: false,
@@ -122,23 +113,31 @@ class Drivers extends React.Component {
                     return (
                         <div>
                             <Link to={`/unit/view/${params.data.number}`}>
-                                <Icon.Eye className="icon-button" size={20} color="darkgray"/>
+                                <Icon.Eye
+                                    className="icon-button"
+                                    size={20}
+                                    color="darkgray"
+                                />
                             </Link>
-                            {this.props.userRole !== "dispatcher" && <Link to={`/unit/edit/${params.data.number}`}>
-                                <Icon.Edit
+                            {this.props.userRole !== "dispatcher" && (
+                                <Link to={`/unit/edit/${params.data.number}`}>
+                                    <Icon.Edit
+                                        className="icon-button ml-1"
+                                        size={20}
+                                        color="darkgray"
+                                    />
+                                </Link>
+                            )}
+                            {this.props.userRole !== "dispatcher" && (
+                                <Icon.Delete
+                                    onClick={() =>
+                                        this.nominateToDelete(params.data.id)
+                                    }
                                     className="icon-button ml-1"
                                     size={20}
                                     color="darkgray"
                                 />
-                            </Link>}
-                            {this.props.userRole !== "dispatcher" &&
-                            <Icon.Delete
-                                onClick={() => this.nominateToDelete(params.data.id)}
-                                className="icon-button ml-1"
-                                size={20}
-                                color="darkgray"
-                            />
-                            }
+                            )}
                         </div>
                     );
                 },
@@ -157,12 +156,15 @@ class Drivers extends React.Component {
         });
     };
     deleteUnit = () => {
-        fetch(`/unit/${this.state.deletingId}`, {
-            headers: {
-                Authorization: this.props.token,
-            },
-            method: "DELETE",
-        }).then((res) => {
+        fetch(
+            process.env.REACT_APP_BASE_URL + `/unit/${this.state.deletingId}`,
+            {
+                headers: {
+                    Authorization: this.props.token,
+                },
+                method: "DELETE",
+            }
+        ).then((res) => {
             this.updateInfo(this.state.page);
         });
         this.setState({
@@ -175,14 +177,16 @@ class Drivers extends React.Component {
             document.getElementById("number") &&
             document.getElementById("number").value;
         let vin =
-            document.getElementById("number") && document.getElementById("vin").value;
+            document.getElementById("number") &&
+            document.getElementById("vin").value;
         this.setState({
             loading: true,
         });
         fetch(
-            `/unit/list?size=10000&page=${pageNumber}${
-                number && `&number=${number}`
-            }${vin && `&vin=${vin}`}`,
+            process.env.REACT_APP_BASE_URL +
+                `/unit/list?size=10&page=${pageNumber}${
+                    number && `&number=${number}`
+                }${vin && `&vin=${vin}`}`,
             {
                 headers: {
                     Authorization: this.props.token,
@@ -204,7 +208,7 @@ class Drivers extends React.Component {
                             return obj.id == el.initialLocation.stateProvince;
                     });
                     let elToShow = {
-                        index: i + 1,
+                        index: i + 1 + this.state.page * 10,
                         state: stateId[0] == null ? "" : stateId[0].name,
                         id: el.id,
                         number: el.number,
@@ -237,7 +241,7 @@ class Drivers extends React.Component {
         this.setState({
             loading: true,
         });
-        fetch("/state_province/all", {
+        fetch(process.env.REACT_APP_BASE_URL + "/state_province/all", {
             headers: {
                 Authorization: this.props.token,
             },
@@ -251,10 +255,10 @@ class Drivers extends React.Component {
             });
     }
 
-    antIcon = (<LoadingOutlined style={{fontSize: 44}} spin/>);
+    antIcon = (<LoadingOutlined style={{ fontSize: 44 }} spin />);
 
     render() {
-        const {columnDefs, defaultColDef} = this.state;
+        const { columnDefs, defaultColDef } = this.state;
         return (
             <>
                 <SweetAlert
@@ -269,7 +273,7 @@ class Drivers extends React.Component {
                     onConfirm={() => {
                         this.deleteUnit(this.state.deletingId);
                     }}
-                    onCancel={() => this.setState({deleteAlert: false})}
+                    onCancel={() => this.setState({ deleteAlert: false })}
                 >
                     You won't be able to revert this!
                 </SweetAlert>
@@ -277,7 +281,9 @@ class Drivers extends React.Component {
                     <div className="d-flex justify-content-between align-items-center mt-2 mx-2 mb-1">
                         <h3 className="mb-0">All units list</h3>
                         <div className="d-flex align-items-center">
-                            <h4 className="mx-1 mb-0 text-nowrap">Global search</h4>
+                            <h4 className="mx-1 mb-0 text-nowrap">
+                                Global search
+                            </h4>
                             <Input
                                 type="text"
                                 placeholder="number"
@@ -303,27 +309,27 @@ class Drivers extends React.Component {
                                     className="d-flex align-items-center"
                                     type="button"
                                 >
-                                    <Icon.Plus size={20}/> Add new unit
+                                    <Icon.Plus size={20} /> Add new unit
                                 </Button>
                             </Link>
                         </div>
                     </div>
 
-                    <CardBody className="py-0 no-pagination">
-                        {this.state.loading ? (
-                            <Spin
-                                indicator={this.antIcon}
-                                style={{
-                                    height: "calc(100vh - 20rem)",
-                                    width: "100%",
-                                    display: "flex",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                }}
-                            />
-                        ) : (
-                            <>
-                                <div className="ag-theme-material w-100 ag-grid-table mb-1">
+                    {this.state.loading ? (
+                        <Spin
+                            indicator={this.antIcon}
+                            style={{
+                                height: "calc(100vh - 20rem)",
+                                width: "100%",
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                            }}
+                        />
+                    ) : (
+                        <>
+                            <CardBody className="py-0 no-pagination">
+                                <div className="ag-theme-material w-100 ag-grid-table with-pagination">
                                     <AgGridReact
                                         enableCellTextSelection="true"
                                         reactNext={true}
@@ -338,20 +344,20 @@ class Drivers extends React.Component {
                                         pivotPanelShow="always"
                                     />
                                 </div>
-                            </>
-                        )}
-                        {/* <Pagination
-                  current={this.state.page + 1}
-                  total={this.state.total}
-                  onChange={this.pageChanged}
-                  pageSize={40}
-                  style={{
-                    textAlign: "center",
-                    margin: "20px",
-                    marginBottom: "50px",
-                  }}
-                /> */}
-                    </CardBody>
+                                <Pagination
+                                    current={this.state.page + 1}
+                                    total={this.state.total}
+                                    onChange={this.pageChanged}
+                                    pageSize={10}
+                                    style={{
+                                        textAlign: "center",
+                                        margin: "20px",
+                                        marginBottom: "50px",
+                                    }}
+                                />
+                            </CardBody>
+                        </>
+                    )}
                 </Card>
             </>
         );
@@ -361,7 +367,7 @@ class Drivers extends React.Component {
 const mapStateToProps = (state) => {
     return {
         token: state.auth.login.token,
-        userRole: state.auth.login.userRole
+        userRole: state.auth.login.userRole,
     };
 };
 export default connect(mapStateToProps)(Drivers);

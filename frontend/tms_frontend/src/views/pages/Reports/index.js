@@ -1,5 +1,5 @@
-import React, {Component} from "react";
-import {connect} from "react-redux";
+import React, { Component } from "react";
+import { connect } from "react-redux";
 import Moment from "react-moment";
 import {
     Row,
@@ -12,14 +12,14 @@ import {
     Label,
     CardHeader,
 } from "reactstrap";
-import {Spin} from "antd";
-import {LoadingOutlined} from "@ant-design/icons";
-import {AgGridReact} from "ag-grid-react";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { AgGridReact } from "ag-grid-react";
 import AsyncSelect from "react-select/async";
 import Select from "react-select";
 import Flatpickr from "react-flatpickr";
 import * as Icon from "react-feather";
-import { MDBRadio } from 'mdb-react-ui-kit';
+import { MDBRadio } from "mdb-react-ui-kit";
 
 class Reports extends Component {
     state = {
@@ -104,7 +104,11 @@ class Reports extends Component {
                         maxWidth: 140,
                         flex: 1,
                         cellRendererFramework: (params) => {
-                            return <Moment format="YYYY-MM-DD HH:mm">{params.value}</Moment>;
+                            return (
+                                <Moment format="YYYY-MM-DD HH:mm">
+                                    {params.value}
+                                </Moment>
+                            );
                         },
                     },
                     {
@@ -127,7 +131,11 @@ class Reports extends Component {
                         maxWidth: 140,
                         flex: 1,
                         cellRendererFramework: (params) => {
-                            return <Moment format="YYYY-MM-DD HH:mm">{params.value}</Moment>;
+                            return (
+                                <Moment format="YYYY-MM-DD HH:mm">
+                                    {params.value}
+                                </Moment>
+                            );
                         },
                     },
                     {
@@ -288,13 +296,17 @@ class Reports extends Component {
         ],
     };
     componentDidMount() {
-        fetch("/owned_company/all_by_visibility?sort=id,DESC&size=10000", {
-            headers: {
-                Authorization: this.props.token,
-                "Content-Type": "application/json",
-            },
-            method: "GET",
-        })
+        fetch(
+            process.env.REACT_APP_BASE_URL +
+                "/owned_company/all_by_visibility?sort=id,DESC&size=10000",
+            {
+                headers: {
+                    Authorization: this.props.token,
+                    "Content-Type": "application/json",
+                },
+                method: "GET",
+            }
+        )
             .then((res) => res.json())
             .then((data) => {
                 let companies = data.map((item) => {
@@ -303,9 +315,9 @@ class Reports extends Component {
                         label: item.name,
                     };
                 });
-                this.setState({companies});
+                this.setState({ companies });
             });
-        fetch("/team/all_by_visibility",{
+        fetch(process.env.REACT_APP_BASE_URL + "/team/all_by_visibility", {
             headers: {
                 Authorization: this.props.token,
                 "Content-Type": "application/json",
@@ -320,12 +332,15 @@ class Reports extends Component {
                         label: item.name,
                     };
                 });
-                this.setState({teams});
+                this.setState({ teams });
             });
     }
 
     loadOptions = (inputValue, callback) => {
-        fetch(`/unit/search_by_number?q=${inputValue}`, {
+        fetch(
+            process.env.REACT_APP_BASE_URL +
+                `/unit/search_by_number?q=${inputValue}`,
+            {
                 headers: {
                     Authorization: this.props.token,
                     "Content-Type": "application/json",
@@ -348,7 +363,8 @@ class Reports extends Component {
     };
     loadDrivers = (inputValue, callback) => {
         fetch(
-            `/driver/list?sort=id,DESC&size=10000&page=0&searchNameText=${inputValue}`
+            process.env.REACT_APP_BASE_URL +
+                `/driver/list?sort=id,DESC&size=10000&page=0&searchNameText=${inputValue}`
         )
             .then((res) => res.json())
             .then((data) =>
@@ -364,18 +380,24 @@ class Reports extends Component {
             );
     };
     getTable = () => {
-        this.setState({loading: true, data: []});
+        this.setState({ loading: true, data: [] });
 
-        let {driver, unit, team, company, companysTruck, start, end} = this.state;
+        let { driver, unit, team, company, companysTruck, start, end } =
+            this.state;
 
         fetch(
-            `accounting/info?${start ? `startTime=${Date.parse(start)}` : ""}${
-                end ? `&endTime=${Date.parse(end)}` : ""
-            }${driver ? `&driver_id=${driver}` : ""}${
-                unit ? `&truck_number=${unit}` : ""
-            }${team ? `&team_id=${team}` : ""}${
-                company ? `&carrier=${company}` : ""
-            }${companysTruck ? `&all_by_companys_truck=${companysTruck}` : ""}`,
+            process.env.REACT_APP_BASE_URL +
+                `/accounting/info?${
+                    start ? `startTime=${Date.parse(start)}` : ""
+                }${end ? `&endTime=${Date.parse(end)}` : ""}${
+                    driver ? `&driver_id=${driver}` : ""
+                }${unit ? `&truck_number=${unit}` : ""}${
+                    team ? `&team_id=${team}` : ""
+                }${company ? `&carrier=${company}` : ""}${
+                    companysTruck
+                        ? `&all_by_companys_truck=${companysTruck}`
+                        : ""
+                }`,
             {
                 headers: {
                     Authorization: this.props.token,
@@ -385,7 +407,7 @@ class Reports extends Component {
             .then((res) => res.json())
             .then((data) => {
                 // console.log(data);
-                this.setState({data, loading: false});
+                this.setState({ data, loading: false });
             })
             .catch((err) => {
                 console.log(err);
@@ -393,7 +415,8 @@ class Reports extends Component {
     };
 
     componentDidUpdate(prevProps, prevState) {
-        let {driver, unit, team, company, companysTruck, start, end} = this.state;
+        let { driver, unit, team, company, companysTruck, start, end } =
+            this.state;
         if (
             start !== prevState.start ||
             end !== prevState.end ||
@@ -417,18 +440,24 @@ class Reports extends Component {
         this.setState({
             buttonLoading: true,
         });
-        let {driver, unit, team, company, companysTruck, start, end} = this.state;
+        let { driver, unit, team, company, companysTruck, start, end } =
+            this.state;
 
         let weekly = document.getElementById("weekly").checked;
 
         fetch(
-            `/accounting?${start ? `startTime=${Date.parse(start)}` : ""}${
-                end ? `&endTime=${Date.parse(end)}` : ""
-            }${driver ? `&driver_id=${driver}` : ""}${
-                unit ? `&truck_number=${unit}` : ""
-            }${team ? `&team_id=${team}` : ""}${
-                company ? `&carrier=${company}` : ""
-            }${companysTruck ? `&all_by_companys_truck=${companysTruck}` : ""}${weekly ? `&weekly=${weekly}`: ""}`,
+            process.env.REACT_APP_BASE_URL +
+                `/accounting?${start ? `startTime=${Date.parse(start)}` : ""}${
+                    end ? `&endTime=${Date.parse(end)}` : ""
+                }${driver ? `&driver_id=${driver}` : ""}${
+                    unit ? `&truck_number=${unit}` : ""
+                }${team ? `&team_id=${team}` : ""}${
+                    company ? `&carrier=${company}` : ""
+                }${
+                    companysTruck
+                        ? `&all_by_companys_truck=${companysTruck}`
+                        : ""
+                }${weekly ? `&weekly=${weekly}` : ""}`,
             {
                 headers: {
                     Authorization: this.props.token,
@@ -442,7 +471,9 @@ class Reports extends Component {
                 let anchor = document.createElement("a");
 
                 anchor.download = "report.xlsx";
-                anchor.href = (window.webkitURL || window.URL).createObjectURL(blob);
+                anchor.href = (window.webkitURL || window.URL).createObjectURL(
+                    blob
+                );
                 anchor.dataset.downloadurl = [
                     "text/plain",
                     anchor.download,
@@ -459,10 +490,11 @@ class Reports extends Component {
                 });
             });
     };
-    antIcon = (<LoadingOutlined style={{fontSize: 44}} spin/>);
+    antIcon = (<LoadingOutlined style={{ fontSize: 44 }} spin />);
 
     render() {
-        let {driver, unit, team, company, companysTruck, start, end} = this.state;
+        let { driver, unit, team, company, companysTruck, start, end } =
+            this.state;
         let isActive =
             start.length &&
             end.length &&
@@ -479,15 +511,19 @@ class Reports extends Component {
                                         borderBottom: "1px solid #ededed",
                                     }}
                                 >
-                                    <h1 className="invoice-logo mb-0 mr-1">Get Report</h1>
-                                    <Icon.Clipboard size={25}/>
+                                    <h1 className="invoice-logo mb-0 mr-1">
+                                        Get Report
+                                    </h1>
+                                    <Icon.Clipboard size={25} />
                                 </CardHeader>
                                 <CardBody className="invoice-padding pb-2">
                                     <Form>
                                         <Row>
                                             <Col md="6" sm="12">
                                                 <FormGroup>
-                                                    <Label for="from">Start</Label>
+                                                    <Label for="from">
+                                                        Start
+                                                    </Label>
                                                     <Flatpickr
                                                         id="from"
                                                         className="form-control"
@@ -495,16 +531,23 @@ class Reports extends Component {
                                                         options={{
                                                             dateFormat: "Z",
                                                             altInput: true,
-                                                            altFormat: "m-d-Y H:i",
+                                                            altFormat:
+                                                                "m-d-Y H:i",
                                                         }}
                                                         value={this.state.start}
-                                                        onChange={(val) => this.setState({start: val})}
+                                                        onChange={(val) =>
+                                                            this.setState({
+                                                                start: val,
+                                                            })
+                                                        }
                                                     />
                                                 </FormGroup>
                                             </Col>
                                             <Col md="6" sm="12">
                                                 <FormGroup>
-                                                    <Label for="lastNameMulti">End</Label>
+                                                    <Label for="lastNameMulti">
+                                                        End
+                                                    </Label>
                                                     <Flatpickr
                                                         id="until"
                                                         className="form-control"
@@ -512,18 +555,27 @@ class Reports extends Component {
                                                         options={{
                                                             dateFormat: "Z",
                                                             altInput: true,
-                                                            altFormat: "m-d-Y H:i",
+                                                            altFormat:
+                                                                "m-d-Y H:i",
                                                         }}
                                                         value={this.state.end}
-                                                        onChange={(val) => this.setState({end: val})}
+                                                        onChange={(val) =>
+                                                            this.setState({
+                                                                end: val,
+                                                            })
+                                                        }
                                                     />
                                                 </FormGroup>
                                             </Col>
                                             <Col md="6" sm="12">
                                                 <FormGroup>
-                                                    <Label for="cityMulti">Truck</Label>
+                                                    <Label for="cityMulti">
+                                                        Truck
+                                                    </Label>
                                                     <AsyncSelect
-                                                        noOptionsMessage={(value) =>
+                                                        noOptionsMessage={(
+                                                            value
+                                                        ) =>
                                                             !value.inputValue
                                                                 ? "type something to search"
                                                                 : "nothing to show"
@@ -531,9 +583,13 @@ class Reports extends Component {
                                                         placeholder="Search"
                                                         isClearable={true}
                                                         defaultValue={null}
-                                                        loadOptions={this.loadOptions}
+                                                        loadOptions={
+                                                            this.loadOptions
+                                                        }
                                                         onChange={(value) => {
-                                                            if (value !== null) {
+                                                            if (
+                                                                value !== null
+                                                            ) {
                                                                 this.setState({
                                                                     unit: value.value,
                                                                 });
@@ -546,9 +602,12 @@ class Reports extends Component {
                                                             ...theme,
                                                             colors: {
                                                                 ...theme.colors,
-                                                                primary50: "#fe810b",
-                                                                primary25: "rgb(253, 179, 46)",
-                                                                primary: "rgb(253, 179, 46)",
+                                                                primary50:
+                                                                    "#fe810b",
+                                                                primary25:
+                                                                    "rgb(253, 179, 46)",
+                                                                primary:
+                                                                    "rgb(253, 179, 46)",
                                                             },
                                                         })}
                                                     />
@@ -556,9 +615,13 @@ class Reports extends Component {
                                             </Col>
                                             <Col md="6" sm="12">
                                                 <FormGroup>
-                                                    <Label for="driver">Drivers</Label>
+                                                    <Label for="driver">
+                                                        Drivers
+                                                    </Label>
                                                     <AsyncSelect
-                                                        noOptionsMessage={(value) =>
+                                                        noOptionsMessage={(
+                                                            value
+                                                        ) =>
                                                             !value.inputValue
                                                                 ? "type something to search"
                                                                 : "nothing to show"
@@ -566,9 +629,13 @@ class Reports extends Component {
                                                         placeholder="Search"
                                                         isClearable={true}
                                                         defaultValue={null}
-                                                        loadOptions={this.loadDrivers}
+                                                        loadOptions={
+                                                            this.loadDrivers
+                                                        }
                                                         onChange={(value) => {
-                                                            if (value !== null) {
+                                                            if (
+                                                                value !== null
+                                                            ) {
                                                                 this.setState({
                                                                     driver: value.value,
                                                                 });
@@ -581,9 +648,12 @@ class Reports extends Component {
                                                             ...theme,
                                                             colors: {
                                                                 ...theme.colors,
-                                                                primary50: "#fe810b",
-                                                                primary25: "rgb(253, 179, 46)",
-                                                                primary: "rgb(253, 179, 46)",
+                                                                primary50:
+                                                                    "#fe810b",
+                                                                primary25:
+                                                                    "rgb(253, 179, 46)",
+                                                                primary:
+                                                                    "rgb(253, 179, 46)",
                                                             },
                                                         })}
                                                     />
@@ -591,22 +661,30 @@ class Reports extends Component {
                                             </Col>
                                             <Col md="6" sm="12">
                                                 <FormGroup>
-                                                    <Label for="company">Company</Label>
+                                                    <Label for="company">
+                                                        Company
+                                                    </Label>
                                                     <Select
                                                         id="company"
                                                         className="React"
                                                         classNamePrefix="select"
                                                         name="color"
-                                                        options={this.state.companies}
+                                                        options={
+                                                            this.state.companies
+                                                        }
                                                         isClearable={true}
                                                         onChange={(value) => {
-                                                            if (value !== null) {
+                                                            if (
+                                                                value !== null
+                                                            ) {
                                                                 this.setState({
-                                                                    company: value.value,
+                                                                    company:
+                                                                        value.value,
                                                                 });
                                                             } else {
                                                                 this.setState({
-                                                                    company: null,
+                                                                    company:
+                                                                        null,
                                                                 });
                                                             }
                                                         }}
@@ -614,9 +692,12 @@ class Reports extends Component {
                                                             ...theme,
                                                             colors: {
                                                                 ...theme.colors,
-                                                                primary50: "#fe810b",
-                                                                primary25: "rgb(253, 179, 46)",
-                                                                primary: "rgb(253, 179, 46)",
+                                                                primary50:
+                                                                    "#fe810b",
+                                                                primary25:
+                                                                    "rgb(253, 179, 46)",
+                                                                primary:
+                                                                    "rgb(253, 179, 46)",
                                                             },
                                                         })}
                                                     />
@@ -624,16 +705,22 @@ class Reports extends Component {
                                             </Col>
                                             <Col md="6" sm="12">
                                                 <FormGroup>
-                                                    <Label for="team">Team</Label>
+                                                    <Label for="team">
+                                                        Team
+                                                    </Label>
                                                     <Select
                                                         id="team"
                                                         className="React"
                                                         classNamePrefix="select"
                                                         name="color"
-                                                        options={this.state.teams}
+                                                        options={
+                                                            this.state.teams
+                                                        }
                                                         isClearable={true}
                                                         onChange={(value) => {
-                                                            if (value !== null) {
+                                                            if (
+                                                                value !== null
+                                                            ) {
                                                                 this.setState({
                                                                     team: value.value,
                                                                 });
@@ -647,9 +734,12 @@ class Reports extends Component {
                                                             ...theme,
                                                             colors: {
                                                                 ...theme.colors,
-                                                                primary50: "#fe810b",
-                                                                primary25: "rgb(253, 179, 46)",
-                                                                primary: "rgb(253, 179, 46)",
+                                                                primary50:
+                                                                    "#fe810b",
+                                                                primary25:
+                                                                    "rgb(253, 179, 46)",
+                                                                primary:
+                                                                    "rgb(253, 179, 46)",
                                                             },
                                                         })}
                                                     />
@@ -657,22 +747,30 @@ class Reports extends Component {
                                             </Col>
                                             <Col md="6" sm="12">
                                                 <FormGroup>
-                                                    <Label for="company">Company's truck</Label>
+                                                    <Label for="company">
+                                                        Company's truck
+                                                    </Label>
                                                     <Select
                                                         id="company"
                                                         className="React"
                                                         classNamePrefix="select"
                                                         name="color"
-                                                        options={this.state.companies}
+                                                        options={
+                                                            this.state.companies
+                                                        }
                                                         isClearable={true}
                                                         onChange={(value) => {
-                                                            if (value !== null) {
+                                                            if (
+                                                                value !== null
+                                                            ) {
                                                                 this.setState({
-                                                                    companysTruck: value.value,
+                                                                    companysTruck:
+                                                                        value.value,
                                                                 });
                                                             } else {
                                                                 this.setState({
-                                                                    companysTruck: null,
+                                                                    companysTruck:
+                                                                        null,
                                                                 });
                                                             }
                                                         }}
@@ -680,9 +778,12 @@ class Reports extends Component {
                                                             ...theme,
                                                             colors: {
                                                                 ...theme.colors,
-                                                                primary50: "#fe810b",
-                                                                primary25: "rgb(253, 179, 46)",
-                                                                primary: "rgb(253, 179, 46)",
+                                                                primary50:
+                                                                    "#fe810b",
+                                                                primary25:
+                                                                    "rgb(253, 179, 46)",
+                                                                primary:
+                                                                    "rgb(253, 179, 46)",
                                                             },
                                                         })}
                                                     />
@@ -690,9 +791,20 @@ class Reports extends Component {
                                             </Col>
                                             <Col>
                                                 <FormGroup>
-                                                    <Label for="team">Type</Label>
-                                                    <MDBRadio name='flexRadioDefault' id='weekly' label='weekly' defaultChecked/>
-                                                    <MDBRadio name='flexRadioDefault' id='monthly' label='monthly' />
+                                                    <Label for="team">
+                                                        Type
+                                                    </Label>
+                                                    <MDBRadio
+                                                        name="flexRadioDefault"
+                                                        id="weekly"
+                                                        label="weekly"
+                                                        defaultChecked
+                                                    />
+                                                    <MDBRadio
+                                                        name="flexRadioDefault"
+                                                        id="monthly"
+                                                        label="monthly"
+                                                    />
                                                 </FormGroup>
                                             </Col>
                                         </Row>
@@ -706,18 +818,27 @@ class Reports extends Component {
                                     <Button.Ripple
                                         onClick={() => this.getFile()}
                                         color={
-                                            isActive && !this.state.buttonLoading
+                                            isActive &&
+                                            !this.state.buttonLoading
                                                 ? "primary"
                                                 : "secondary"
                                         }
                                         disabled={
-                                            isActive && !this.state.buttonLoading ? false : true
+                                            isActive &&
+                                            !this.state.buttonLoading
+                                                ? false
+                                                : true
                                         }
                                         outline={
-                                            isActive && !this.state.buttonLoading ? false : true
+                                            isActive &&
+                                            !this.state.buttonLoading
+                                                ? false
+                                                : true
                                         }
                                     >
-                                        {this.state.buttonLoading ? "Loading..." : "Download"}
+                                        {this.state.buttonLoading
+                                            ? "Loading..."
+                                            : "Download"}
                                     </Button.Ripple>
                                 </CardBody>
                             </Card>
@@ -748,8 +869,10 @@ class Reports extends Component {
                                             enableCellTextSelection="true"
                                             reactNext={true}
                                             rowSelection="multiple"
-                                            defaultColDef={this.state.defaultColDef}
-                                            columnDefs={this.state.columnDefs }
+                                            defaultColDef={
+                                                this.state.defaultColDef
+                                            }
+                                            columnDefs={this.state.columnDefs}
                                             rowData={this.state.data}
                                             colResizeDefault={"shift"}
                                             animateRows={true}
@@ -771,7 +894,7 @@ class Reports extends Component {
 const mapStateToProps = (state) => {
     return {
         token: state.auth.login.token,
-        userRole: state.auth.login.userRole
+        userRole: state.auth.login.userRole,
     };
 };
 export default connect(mapStateToProps)(Reports);
